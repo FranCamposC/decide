@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'gateway',
+
     'social_django',
+    'django_extensions'
 ]
 
 REST_FRAMEWORK = {
@@ -57,6 +59,10 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     'base.backends.AuthBackend',
+    'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.twitter.TwitterOAuth',
+    
 ]
 
 MODULES = [
@@ -92,6 +98,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -103,7 +111,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'decide.wsgi.application'
 
-LOGIN_REDIRECT_URL = "/"
+
+
+# social auth configs for github
+SOCIAL_AUTH_GITHUB_KEY = '76bc2c2dd2a407d67898'
+SOCIAL_AUTH_GITHUB_SECRET = '4eb3fcbf76b690b66aaf4fff8c6b86d88452d08e'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '91342751811-ipek1l1irdmg6e4f2apjqfunq7rg4q9s.apps.googleusercontent.com' # Google Client ID 
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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' # Google Client Secret
+SOCIAL_AUTH_TWITTER_KEY = 'ISff88yUZQWwVTqfBsSFZpHGu'
+SOCIAL_AUTH_TWITTER_SECRET = 'dmNaZ6E40IsJ2ylKwFwhiClbbKLW9ypUV6DSCXMHbyhEXTu2xV'
+
 
 
 # Database
