@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'gateway',
+    'social_django',
 ]
 
 REST_FRAMEWORK = {
@@ -87,7 +88,7 @@ ROOT_URLCONF = 'decide.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [BASE_DIR + '/templates/'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -101,6 +102,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'decide.wsgi.application'
+
+LOGIN_REDIRECT_URL = "/"
 
 
 # Database

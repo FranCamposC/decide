@@ -11,6 +11,11 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login
+from .forms import LoginForm
+
 from .serializers import UserSerializer
 
 
@@ -53,3 +58,20 @@ class RegisterView(APIView):
         except IntegrityError:
             return Response({}, status=HTTP_400_BAD_REQUEST)
         return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
+
+class LoginForm(APIView):
+    def post(self, request):
+        username = request.data.get('username', '')
+        password = request.data.get('password', '')
+        if not username or not password:
+            return Response({}, status=HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return Response({'message': 'Authenticated successfully'}, status=HTTP_201_CREATED)
+            else:
+                return Response({'message': 'Disabled account'}, status=HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'message': 'Invalid login'}, status=HTTP_401_UNAUTHORIZED)
