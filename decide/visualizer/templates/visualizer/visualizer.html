@@ -41,6 +41,10 @@
                         </tr>
                     </tbody>
                 </table>
+                <div>
+                    <h2 class="heading"> Grafica: </h2>
+                    <canvas id="bar-chart"></canvas>
+                </div>
             </div>
 
         </div>
@@ -52,7 +56,10 @@
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
     <script src="https://unpkg.com/bootstrap@5.2.2/dist/js/bootstrap.js"></script>
-
+    <!-- chart-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- vue-chartjs -->
+    <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
     <script>
         var voting = {{voting|safe}};
         const { createApp } = Vue
@@ -62,8 +69,34 @@
                 return {
                     voting: voting
                 }
+            },
+            mounted() {
+                // Get the context of the canvas element
+                var ctx = document.getElementById('bar-chart').getContext('2d');
+                let chartData = {
+                    labels: this.voting.postproc.map(opt => opt.option),
+                    datasets: [{
+                        label: 'Puntuación',
+                        data: this.voting.postproc.map(opt => opt.postproc),
+                        backgroundColor: '#f87979'
+                    }]
+                };
+                let options = {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                };
+                // Create the bar chart using Chart.js
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                    options: options
+                });
             }
         }).mount('#app-visualizer')
     </script>
-</body>
+
 {% endblock %}
