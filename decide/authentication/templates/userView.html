@@ -1,0 +1,15 @@
+{%extends 'navbar.html'%}
+
+{%block content%}
+        <h1>Bienvenido {{user.username}} </h1>
+        <h2>Estas son sus votaciones disponibles</h2>
+        <ul class='list-group'>
+            {%for voting in votaciones%}
+            {%if voting.start_date%}
+            {%if not voting.end_date%}
+                <a class='list-group-item' href='/booth/{{voting.id}}'> {{voting.name}} </a>           
+                {%endif%}
+            {%endif%}
+            {%endfor%}
+        </ul>
+{%endblock%}
