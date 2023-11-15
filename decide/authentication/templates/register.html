@@ -1,0 +1,24 @@
+{%extends 'navbar.html'%}
+
+{%block content%}
+<body class="container">
+    <form action "/authentication/register/" method="POST" class="card card-body text center" > 
+        <h1>Registro de usuario</h1>    
+        {% csrf_token %}
+        {{error}}
+        {{form.as_p}}
+        <button class="btn btn-primary">
+            Registrarse
+        </button>
+    </form>
+        </div>   
+
+</body>
+
+{%endblock%}
+
+
+
+
+
+
