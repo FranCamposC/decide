@@ -33,6 +33,8 @@ class Voting(models.Model):
     desc = models.TextField(blank=True, null=True)
     question = models.ForeignKey(Question, related_name='voting', on_delete=models.CASCADE)
 
+    ranked = models.BooleanField(default=False)
+
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
 
@@ -108,21 +110,39 @@ class Voting(models.Model):
         self.do_postproc()
 
     def do_postproc(self):
+        ranked = self.ranked
         tally = self.tally
         options = self.question.options.all()
 
         opts = []
-        for opt in options:
-            if isinstance(tally, list):
-                votes = tally.count(opt.number)
-            else:
+        if not ranked:
+            for opt in options:
+                if isinstance(tally, list):
+                    votes = tally.count(opt.number)
+                else:
+                    votes = 0
+                opts.append({
+                    'option': opt.option,
+                    'number': opt.number,
+                    'votes': votes
+                })
+        else:
+            for opt in options:
                 votes = 0
-            opts.append({
-                'option': opt.option,
-                'number': opt.number,
-                'votes': votes
-            })
-
+                for vote in tally:
+                    rank = list(str(vote))
+                    pos = int(rank[opt.number])
+                    if pos == 1:
+                        votes = votes + 3
+                    elif pos == 2:
+                        votes = votes + 2
+                    elif pos == 3:
+                        votes = votes + 1
+                opts.append({
+                    'option': opt.option,
+                    'number': opt.number,
+                    'votes': votes
+                })
         data = { 'type': 'IDENTITY', 'options': opts }
         postp = mods.post('postproc', json=data)
 

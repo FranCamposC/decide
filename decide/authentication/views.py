@@ -7,9 +7,15 @@ from rest_framework.status import (
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
+from django.contrib.auth import login,authenticate,logout
 from django.db import IntegrityError
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404,render,redirect
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
+from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
+from census.models import Census
+from voting.models import Voting
+
 
 from .serializers import UserSerializer
 
@@ -53,3 +59,62 @@ class RegisterView(APIView):
         except IntegrityError:
             return Response({}, status=HTTP_400_BAD_REQUEST)
         return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
+
+def WelcomeView(request):
+    return render(request,'welcome.html')
+
+def UserView(request):
+    censos=Census.objects.filter(voter_id=request.user.id)
+    id_votaciones=[censo.voting_id for censo in censos]
+    votaciones_usuario=Voting.objects.filter(id__in=id_votaciones)
+    return render(request,'userView.html',{'votaciones':votaciones_usuario,'usuario':request.user})
+
+def Register(request):
+    if request.method == 'GET':
+        return render(request,'register.html',{
+            'form': UserCreationForm
+        })
+    else:   
+        if request.POST['password1']==request.POST['password2']:  
+            try:
+                usuario=User.objects.create_user(username=request.POST['username'],     
+                                    password=request.POST['password1'])
+                usuario.save()
+                login(request,usuario)
+                return redirect('user')
+            except:
+                return render(request,'register.html',{
+                'form': UserCreationForm,
+                    'error':'El nombre del usuario ya existe'
+        })
+        else:
+            return render(request,'register.html',{
+                'form': UserCreationForm,
+                'error':'Las contraseñas no coinciden'
+        })
+
+def cerrarSesion(request):
+    logout(request)
+    return redirect('home')
+
+
+    
+def Login(request):
+    if request.method=='GET':
+        return render(request,'login.html',{
+            'form':AuthenticationForm
+        })
+    else:
+        usuario=authenticate(
+            request,username=request.POST['username'], password=request.POST
+            ['password'])
+        if usuario is None:
+            return render(request,'login.html',{
+                'form':AuthenticationForm,
+                'error':'Usuario o contraseña incorrectos'
+            })
+        else:
+            login(request,usuario)
+            return redirect('user')
+
+         
