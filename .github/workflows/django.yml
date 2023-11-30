@@ -49,7 +49,7 @@ jobs:
       id: get_labels
       run: |
         pr_number=${{ github.event.number }}
-        pr_url="https://api.github.com/repos/nicoloboo02/decide/pulls/$pr_number"
+        pr_url="https://api.github.com/repos/FranCamposC/decide/pulls/$pr_number"
         pr_response=$(curl -s "$pr_url")
         if [[ $(echo "$pr_response" | jq -r '.message') == "Not Found" ]]; then
           echo "Error: Pull request not found. Please check if the PR number is correct."
@@ -64,7 +64,7 @@ jobs:
     - name: Run Tests based on Labels
       run: |
           pr_number=${{ github.event.number }}
-          pr_url="https://api.github.com/repos/nicoloboo02/decide/pulls/$pr_number"
+          pr_url="https://api.github.com/repos/FranCamposC/decide/pulls/$pr_number"
           pr_response=$(curl -s "$pr_url")
           labels=$(echo "$pr_response" | jq -r '.labels[].name')
           cd decide
