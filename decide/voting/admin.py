@@ -4,6 +4,7 @@ from django.utils import timezone
 from .models import QuestionOption
 from .models import Question
 from .models import Voting
+from .form import QuestionOptionForm
 
 from .filters import StartedFilter
 
@@ -29,6 +30,7 @@ def tally(ModelAdmin, request, queryset):
 
 class QuestionOptionInline(admin.TabularInline):
     model = QuestionOption
+    form = QuestionOptionForm
 
 
 class QuestionAdmin(admin.ModelAdmin):

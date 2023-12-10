@@ -1,7 +1,8 @@
 from django.db import models
 from django.db.models import JSONField
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
+from django.forms import ValidationError
 
 from base import mods
 from base.models import Auth, Key
@@ -9,6 +10,7 @@ from base.models import Auth, Key
 
 class Question(models.Model):
     desc = models.TextField()
+    is_binary_question = models.BooleanField(default = False)
 
     def __str__(self):
         return self.desc
@@ -22,11 +24,14 @@ class QuestionOption(models.Model):
     def save(self):
         if not self.number:
             self.number = self.question.options.count() + 2
+
+        if self.question_id is None or not self.question_id:
+            self.question.save()
+
         return super().save()
 
     def __str__(self):
         return '{} ({})'.format(self.option, self.number)
-
 
 class Voting(models.Model):
     name = models.CharField(max_length=200)
