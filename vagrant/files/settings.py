@@ -41,3 +41,7 @@ APIS = {
     'visualizer': 'http://localhost:8000',
     'voting': 'http://localhost:8000',
 }
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_TRUSTED_ORIGINS = ALLOWED.ORIGINS.copy()
