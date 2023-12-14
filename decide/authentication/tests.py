@@ -128,3 +128,24 @@ class AuthTestCase(APITestCase):
             sorted(list(response.json().keys())),
             ['token', 'user_pk']
         )
+    
+    def test_register_and_login(self):
+        data = {'username': 'admin', 'password': 'admin'}
+        response = self.client.post('/authentication/login/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+        token = response.json()
+
+        token.update({'username': 'user1', 'password': 'pwd1'})
+        response = self.client.post('/authentication/register/', token, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            sorted(list(response.json().keys())),
+            ['token', 'user_pk']
+        )
+
+        response = self.client.post('/authentication/login/', token, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            sorted(list(response.json().keys())),
+            ['token']
+        )

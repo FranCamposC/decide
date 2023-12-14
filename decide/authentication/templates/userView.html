@@ -2,7 +2,7 @@
 
 {%block content%}
         <h1>Bienvenido {{user.username}} </h1>
-        <h2>Estas son sus votaciones disponibles</h2>
+        <h2 id="votaciones">Estas son sus votaciones disponibles</h2>
         <ul class='list-group'>
             {%for voting in votaciones%}
             {%if voting.start_date%}
