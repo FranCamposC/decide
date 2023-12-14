@@ -102,7 +102,8 @@ def cerrarSesion(request):
 def Login(request):
     if request.method=='GET':
         return render(request,'login.html',{
-            'form':AuthenticationForm
+            'form':AuthenticationForm,
+            'admin':False
         })
     else:
         usuario=authenticate(
@@ -111,10 +112,31 @@ def Login(request):
         if usuario is None:
             return render(request,'login.html',{
                 'form':AuthenticationForm,
-                'error':'Usuario o contraseña incorrectos'
+                'error':'Usuario o contraseña incorrectos',
+                'admin':False
             })
         else:
             login(request,usuario)
             return redirect('user')
+        
+def LoginAdmin(request):
+    if request.method=='GET':
+        return render(request,'login.html',{
+            'form':AuthenticationForm,
+            'admin':True
+        })
+    if request.method=='POST':
+        usuario=authenticate(
+            request,username=request.POST['username'], password=request.POST
+            ['password'])
+        if usuario is None or not usuario.is_staff:
+            return render(request,'login.html',{
+                'form':AuthenticationForm,
+                'error':'Usuario o contraseña incorrectos',
+                'admin':True
+            })
+        else:
+            login(request,usuario)
+            return redirect('admin')
 
          
