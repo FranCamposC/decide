@@ -69,6 +69,9 @@ def UserView(request):
     votaciones_usuario=Voting.objects.filter(id__in=id_votaciones)
     return render(request,'userView.html',{'votaciones':votaciones_usuario,'usuario':request.user})
 
+def AdminView(request):
+    return render(request,'adminView.html')
+
 def Register(request):
     if request.method == 'GET':
         return render(request,'register.html',{
@@ -137,6 +140,6 @@ def LoginAdmin(request):
             })
         else:
             login(request,usuario)
-            return redirect('admin')
+            return redirect('/user/admin')
 
          

@@ -1,0 +1,12 @@
+{%extends 'navbar.html'%}
+
+{%block content%}
+        <br>
+        <h1 style="text-align: center;">Bienvenido {{user.username}} </h1>
+        <h2 style="text-align: center;">Opciones disponibles</h2>
+        <div class="col-md-7 mx-auto flex-column" style="text-align: center;">
+            <button type="button" class="btn btn-lg btn-primary my-4" onclick="window.location.href='/list/voting'">Votaciones</button>
+            <button type="button" class="btn btn-lg btn-primary my-4" onclick="window.location.href='/list/questions'">Preguntas</button>
+            <button type="button" class="btn btn-lg btn-primary my-4" onclick="window.location.href='/list/census'">Censos</button>
+        </div>   
+{%endblock%}
