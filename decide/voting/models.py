@@ -24,17 +24,33 @@ class Question(models.Model):
         return self.desc
 
 
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+
+        if self.type == QuestionType.BINARY:
+            if not is_new:
+                self.options.all().delete()
+            if not self.options.filter(option="Sí").exists():
+                QuestionOption.objects.create(question=self, option="Sí", number=1)
+            if not self.options.filter(option="No").exists():
+                QuestionOption.objects.create(question=self, option="No", number=2)
+
+
+
+
 class QuestionOption(models.Model):
     question = models.ForeignKey(Question, related_name='options', on_delete=models.CASCADE)
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if not self.number:
             self.number = self.question.options.count() + 2
 
-        if self.question_id is None or not self.question_id:
-            self.question.save()
+        # Verifica si la pregunta es de tipo binario y evita crear opciones adicionales
+        if self.question.type != QuestionType.BINARY or not self.question.options.exists():
+            super().save(*args, **kwargs)
 
 
 
