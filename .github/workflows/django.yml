@@ -1,0 +1,75 @@
+name: Dynamic Tests on Pull Request
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  test:
+
+    services:
+      postgres:
+        image: postgres:11.18-bullseye
+        env:
+          POSTGRES_USER: decide
+          POSTGRES_PASSWORD: decide
+          POSTGRES_DB: decide
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        cp decide/local_settings.gactions.py decide/local_settings.py
+
+    - name: Apply Migrations
+      run: | 
+        cd decide
+        python manage.py makemigrations
+        python manage.py migrate
+
+    - name: Install jq
+      run: sudo apt-get install jq -y
+
+    - name: Get Labels
+      id: get_labels
+      run: |
+        pr_number=${{ github.event.number }}
+        pr_url="https://api.github.com/repos/FranCamposC/decide/pulls/$pr_number"
+        pr_response=$(curl -s "$pr_url")
+        if [[ $(echo "$pr_response" | jq -r '.message') == "Not Found" ]]; then
+          echo "Error: Pull request not found. Please check if the PR number is correct."
+          exit 1
+        fi
+    
+        echo "Pull Request response: $pr_response"
+        labels=$(echo "$pr_response" | jq -r '.labels[].name')
+        echo "Extracted labels: $labels"
+
+
+    - name: Run Tests based on Labels
+      run: |
+          pr_number=${{ github.event.number }}
+          pr_url="https://api.github.com/repos/FranCamposC/decide/pulls/$pr_number"
+          pr_response=$(curl -s "$pr_url")
+          labels=$(echo "$pr_response" | jq -r '.labels[].name')
+          cd decide
+          for label in $labels; do
+            echo "Running tests for module: $label"
+            python manage.py test --exclude-tag=slow $label
+          done
