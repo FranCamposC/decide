@@ -7,10 +7,18 @@ from django.forms import ValidationError
 from base import mods
 from base.models import Auth, Key
 
+class QuestionType(models.TextChoices):
+    BINARY = 'SI_NO', 'Binario'
+    RANKING = 'RANKING', 'Ranking'
+    NORMAL = 'NORMAL', 'Normal'
 
 class Question(models.Model):
     desc = models.TextField()
-    is_binary_question = models.BooleanField(default = False)
+    type = models.CharField(
+        max_length=10,
+        choices=QuestionType.choices,
+        default=QuestionType.NORMAL
+    )
 
     def __str__(self):
         return self.desc
@@ -27,6 +35,8 @@ class QuestionOption(models.Model):
 
         if self.question_id is None or not self.question_id:
             self.question.save()
+
+
 
         return super().save()
 
