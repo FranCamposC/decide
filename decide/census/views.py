@@ -53,10 +53,11 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
 
-    def export(self, request, *args, **kwargs):
+class CensusExport(generics.RetrieveAPIView):
+    def retrieve(self, request, voting_id = None, *args, **kwargs):
         try:
             import csv
-            response = HTTPResponse(content_type='text/csv')
+            response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="census.csv"'
 
             writer = csv.writer(response)
