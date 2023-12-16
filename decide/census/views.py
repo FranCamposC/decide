@@ -54,6 +54,16 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
 
+class CensusList(ListView):
+    template_name = 'censusList.html'
+    queryset = Census.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        census = getParsedCensus().items()
+        context['object_list'] = census
+        return context
+
 def getParsedCensus():
     res = {}
     census = Census.objects.all()
