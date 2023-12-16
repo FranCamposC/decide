@@ -1,7 +1,8 @@
+from django.contrib.auth.decorators import login_required, user_passes_test
 import django_filters.rest_framework
 from django.conf import settings
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect,render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.views.generic.list import ListView
@@ -11,7 +12,9 @@ from .serializers import SimpleVotingSerializer, VotingSerializer
 from base.perms import UserIsStaff
 from base.models import Auth
 
-
+def staff_check(user):
+   admin = user.is_staff
+   return admin 
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
     serializer_class = VotingSerializer
@@ -105,11 +108,13 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
     
 
 
-class ListQuestion(ListView):
-    template_name = 'listQuestion.html'
-    queryset = Question.objects.all().order_by('-id')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['questions'] = context['object_list'] 
-        return context
+@login_required
+@user_passes_test(staff_check)
+def ListQuestion(request):
+        census = Question.objects.all()
+        return render(request, 'listQuestion.html', {
+            'object_list':census
+        })
+
+    
