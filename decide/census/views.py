@@ -79,3 +79,22 @@ def getParsedCensus():
             res[voting] = []
         res[voting].append(voter)
     return res
+
+
+@login_required
+@user_passes_test(staff_check)
+def deleteCensus(request, voting_id):
+    census = Census.objects.filter(voting_id=voting_id)
+    for c in census:
+        Census.delete(c)
+
+    return redirect('/census/list')
+
+@login_required
+@user_passes_test(staff_check)
+def editCensus(request, voting_id):
+    census = Census.objects.filter(voting_id=voting_id)
+    
+    return render(request, 'censusList.html', {
+        'object_list':census
+    })
