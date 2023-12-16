@@ -107,7 +107,7 @@ def VotingListView(request):
     templates_name= "listVotings.html"
     votings = Voting.objects.all()
     context = {
-        'votings': votings, 'admin': True
+        'votings': votings
     }
     return render(request, 'listVotings.html', context)
 
