@@ -92,9 +92,10 @@ def deleteCensus(request, voting_id):
 
 @login_required
 @user_passes_test(staff_check)
-def editCensus(request, voting_id):
-    census = Census.objects.filter(voting_id=voting_id)
-    
-    return render(request, 'censusList.html', {
-        'object_list':census
+def createCensus(request):
+    votings = Voting.objects.all()
+    users = Census.objects.all()
+    return render(request, 'createCensus.html', {
+        'votings':votings,
+        'users': users
     })
