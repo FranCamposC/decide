@@ -43,10 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
-    'gateway',
-
-    'social_django',
-    'django_extensions'
+    'gateway'
 ]
 
 REST_FRAMEWORK = {
