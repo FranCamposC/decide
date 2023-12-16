@@ -1,4 +1,6 @@
+import csv
 import random
+import io
 from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
@@ -11,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
 from .models import Census
+from voting.models import Question, Voting
 from base import mods
 from base.tests import BaseTestCase
 from datetime import datetime
@@ -163,3 +166,26 @@ class CensusTest(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/census/census/add")
+
+class CensusExportTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.census = Census(voting_id = 1, voter_id = 1)
+        self.census.save()
+        q = Question(desc='none')
+        q.save()
+        self.voting = Voting(name = "Test", question = q)
+        self.voting.save()
+    def tearDown(self):
+        super().tearDown()
+        self.census = None
+        self.voting = None
+    def test_export_census_csv(self):
+        response = self.client.get('/census/export/1')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Disposition'], 'attachment; filename="census.csv"')
+        content = response.content.decode('utf-8')
+        csv_reader = csv.reader(io.StringIO(content))
+        body = list(csv_reader)
+        self.assertEqual(body[0], ['voting_id', 'voter_id'])
+        self.assertEqual(body[1], ['1', '1'])
