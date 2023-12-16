@@ -1,3 +1,5 @@
+from http.client import HTTPResponse
+from django.http import HttpResponse
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import generics
@@ -7,7 +9,8 @@ from rest_framework.status import (
         HTTP_204_NO_CONTENT as ST_204,
         HTTP_400_BAD_REQUEST as ST_400,
         HTTP_401_UNAUTHORIZED as ST_401,
-        HTTP_409_CONFLICT as ST_409
+        HTTP_409_CONFLICT as ST_409,
+        HTTP_500_INTERNAL_SERVER_ERROR as ST_500
 )
 
 from base.perms import UserIsStaff
@@ -49,3 +52,18 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
         except ObjectDoesNotExist:
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
+
+    def export(self, request, *args, **kwargs):
+        try:
+            import csv
+            response = HTTPResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="census.csv"'
+
+            writer = csv.writer(response)
+            writer.writerow(['voting_id', 'voter_id'])
+
+            for census in Census.objects.all().values_list('voting_id', 'voter_id'):
+                writer.writerow(census)
+        except Exception as e:
+            return Response('Error processing request', status=ST_500)
+        return response
