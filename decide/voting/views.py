@@ -118,3 +118,11 @@ def ListQuestion(request):
         })
 
     
+
+@login_required
+@user_passes_test(staff_check)  
+def QuestionDeleteView(request, question_id):
+    question = Question.objects.filter(pk=question_id).first()
+    Question.delete(question)
+
+    return redirect('/voting/question/list')
