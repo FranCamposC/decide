@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+    <link type="text/css" rel="stylesheet"
+         href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="{% static "booth/style.css" %}" />
+{% endblock %}
+{%block content%}
+<style>
+   .option-element {
+       margin-right: 1em;
+   }
+</style>
+
+<div id="app-booth">
+   <div id="admin-census">
+       <!-- Navbar -->
+       <nav class="navbar navbar-dark bg-primary">
+           <div class="container-fluid">
+               <div class="navbar-brand" >Decide</div>
+           </div>
+       </nav>
+   </div>
+   <br>
+<form method="post">
+    {% csrf_token %}
+<h3>¿Cuantas respuestas quieres que tenga tu pregunta?</h3>
+<input name="number" type="number" min="2" max="10">
+<button type="submit" class="btn btn-danger btn-sm">Confirmar</button>
+</form>
+{%endblock%}
