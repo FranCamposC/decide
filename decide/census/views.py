@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import user_passes_test, login_required
+from django.shortcuts import render,redirect
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from voting.models import Voting
@@ -54,15 +56,18 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
 
-class CensusList(ListView):
-    template_name = 'censusList.html'
-    queryset = Census.objects.all()
+def staff_check(user):
+   admin = user.is_staff
+   return admin 
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        census = getParsedCensus().items()
-        context['object_list'] = census
-        return context
+@login_required
+@user_passes_test(staff_check)
+def CensusList(request):
+    census = getParsedCensus().items()
+    return render(request, 'censusList.html', {
+        'object_list':census
+    })
+    
 
 def getParsedCensus():
     res = {}
