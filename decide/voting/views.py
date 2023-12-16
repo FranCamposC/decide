@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics, status
 from rest_framework.response import Response
+from django.views.generic.list import ListView
 
 from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer
@@ -109,3 +110,13 @@ def VotingListView(request):
         'votings': votings, 'admin': True
     }
     return render(request, 'listVotings.html', context)
+
+
+class ListQuestion(ListView):
+    template_name = 'listQuestion.html'
+    queryset = Question.objects.all().order_by('-id')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questions'] = context['object_list'] 
+        return context

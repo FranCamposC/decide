@@ -1,7 +1,11 @@
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from voting.models import Voting
+from django.contrib.auth.models import User
 from rest_framework import generics
+from .models import Census
 from rest_framework.response import Response
+from django.views.generic.list import ListView
 from rest_framework.status import (
         HTTP_201_CREATED as ST_201,
         HTTP_204_NO_CONTENT as ST_204,
@@ -49,3 +53,24 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
         except ObjectDoesNotExist:
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
+
+class CensusList(ListView):
+    template_name = 'censusList.html'
+    queryset = Census.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        census = getParsedCensus().items()
+        context['object_list'] = census
+        return context
+
+def getParsedCensus():
+    res = {}
+    census = Census.objects.all()
+    for c in census:
+        voting = Voting.objects.get(pk=c.voting_id)
+        voter = User.objects.get(pk=c.voter_id)
+        if voting not in res.keys():
+            res[voting] = []
+        res[voting].append(voter)
+    return res
