@@ -38,9 +38,6 @@ class Question(models.Model):
 
 
         # Validacines del type
-        elif self.type == QuestionType.NORMAL and self.options.count() < 2:
-            raise ValidationError('Las preguntas de tipo normal deben tener al menos 2 opciones.')
-
         elif self.type == QuestionType.RANKING and self.options.count() < 3:
             raise ValidationError('Las preguntas de tipo ranking deben tener al menos 3 opciones.')
 
