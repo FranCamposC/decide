@@ -167,7 +167,8 @@ def createQuestion(request):
 
     })
 
-
+@login_required
+@user_passes_test(staff_check) 
 def auxCreateQuestion(request, numero):
     numero_range = range(numero)
     if request.method == 'POST':
@@ -184,3 +185,55 @@ def auxCreateQuestion(request, numero):
         "numero":numero_range
     })
 
+@login_required
+@user_passes_test(staff_check)
+def VotingCreateView(request):
+    questions = Question.objects.all()
+
+    if request.method == 'POST':
+
+        name = request.POST.get('name')
+        desc = request.POST.get('desc')
+        question = request.POST.get('question')
+        question = Question.objects.get(pk=question)
+
+        voting = Voting(name=name, desc=desc, question=question)
+        voting.save()
+
+
+        return redirect('/voting/list' )
+    return render(request, 'createVoting.html', {
+        'questions': questions
+    })
+
+@login_required
+@user_passes_test(staff_check) 
+def VotingEditView(request, voting_id):
+    voting = Voting.objects.filter(pk=voting_id).first()
+    questions = Question.objects.all()
+
+    if request.method == 'POST':
+        # get data from the form
+        name = request.POST.get('name')
+        desc = request.POST.get('desc')
+        question = request.POST.get('question')
+
+        # update the product
+        if name != None and name != '':
+            voting.name = name
+        if desc != None and desc != '':
+            voting.desc = desc
+        if question != None and question != '':
+            question = Question.objects.get(pk=question)
+            voting.question = question
+
+        # save the product
+        voting.save()
+
+        # redirect to the same page after saving
+        return redirect('/voting/list')
+
+    return render(request, 'votingEdit.html', {
+        'voting': voting,
+        'questions': questions
+    })

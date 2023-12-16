@@ -92,9 +92,21 @@ def deleteCensus(request, voting_id):
 
 @login_required
 @user_passes_test(staff_check)
-def editCensus(request, voting_id):
-    census = Census.objects.filter(voting_id=voting_id)
-    
-    return render(request, 'censusList.html', {
-        'object_list':census
+def createCensus(request):
+    votings = Voting.objects.all().order_by('name')
+    users = User.objects.all().order_by('username')
+
+    if request.method == 'POST':
+
+        voting = request.POST.get('v')
+        user = request.POST.getlist('u')
+        for u in user:
+            census = Census(voting_id=int(voting), voter_id=int(u))
+            census.save()
+
+
+        return redirect('/census/list' )
+    return render(request, 'createCensus.html', {
+        'votings':votings,
+        'users': users
     })
