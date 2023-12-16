@@ -24,10 +24,26 @@
        </nav>
    </div>
    <br>
-<form method="post">
+   <form class="center-form" method="post">
     {% csrf_token %}
-<h3>¿Cuantas respuestas quieres que tenga tu pregunta?</h3>
-<input name="number" type="number" min="2" max="10">
-<button type="submit" class="btn btn-danger btn-sm">Confirmar</button>
-</form>
+  
+    <h3>¿Cuantas respuestas quieres que tenga tu pregunta?</h3>
+  
+    <div class="input-container">
+      <input name="number" type="number" min="2" max="10">
+      <button type="submit" class="btn btn-danger btn-sm">Confirmar</button>
+    </div>
+  
+  </form>
+
+<style>
+    .center-form {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 50vh; /* This will cover the full height of the viewport */
+        flex-direction: column;
+    }
+</style>
+    
 {%endblock%}
