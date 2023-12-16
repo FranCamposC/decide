@@ -110,3 +110,27 @@ def createCensus(request):
         'votings':votings,
         'users': users
     })
+
+@login_required
+@user_passes_test(staff_check)
+def editCensus(request, voting_id):
+    voting = Voting.objects.get(pk=voting_id)
+    users = User.objects.all().order_by('username')
+    census = Census.objects.filter(voting_id=voting_id)
+    selectedUsers = []
+    for c in census:
+        selectedUsers.append(User.objects.get(pk=c.voter_id))
+    if request.method == 'POST':
+        user = request.POST.getlist('u')
+
+        for c in census:
+            Census.delete(c)
+        for u in user:
+            census = Census(voting_id=voting_id, voter_id=int(u))
+            census.save()
+        return redirect('/census/list' )
+    return render(request, 'editCensus.html', {
+        'voting':voting,
+        'users': users,
+        'selectedUsers': selectedUsers
+    })

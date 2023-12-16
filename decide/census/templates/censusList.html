@@ -15,17 +15,20 @@
 </style>
 
 <div id="app-booth">
-   <div id="admin-census">
+    <div id="admin-census">
        <!-- Navbar -->
        <nav class="navbar navbar-dark bg-primary">
            <div class="container-fluid">
                <div class="navbar-brand" >Decide</div>
            </div>
        </nav>
-   </div>
-   <br>
-   <h1 style="text-align:center">Listado de censos</h1>
-   <div class="row">
+    </div>
+    <br>
+    <h1 style="text-align:center">Listado de censos</h1>
+        <div class="d-flex flex-column">
+            <a href="/census/create" style="width: 200px; align-self: center;" class="btn btn-primary">Crear censo</a>
+        </div>
+    <div class="row">
         {% for voting, voters in object_list %}
             <div class="col-md-4">
                 <br>
