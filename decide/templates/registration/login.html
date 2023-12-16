@@ -1,4 +1,3 @@
-{% load static %}
 {% block title %}Welcome to decide{% endblock %}
 {% block content %}
   <div class="login-container">
@@ -14,17 +13,17 @@
       <ul>
         <li class="google">
           <a href="{% url "social:begin" "google-oauth2" %}">
-            <img src="{% static 'images/google.png' %}" alt="Google">
+            <img src="{% static 'images/google.png' %}" alt="Google" class="icon-size">
           </a>
         </li>
         <li class="twitter">
           <a href="{% url "social:begin" "twitter" %}">
-            <img src="{% static 'images/twitter.png' %}" alt="Twitter">
+            <img src="{% static 'images/twitter.png' %}" alt="Twitter" class="icon-size">
           </a>
         </li>
         <li class="github">
           <a href="{% url 'social:begin' 'github' %}">
-            <img src="{% static 'images/github.png' %}" alt="GitHub">
+            <img src="{% static 'images/github.png' %}" alt="GitHub" class="icon-size">
           </a>
         </li>
       </ul>
