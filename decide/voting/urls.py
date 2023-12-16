@@ -10,5 +10,6 @@ urlpatterns = [
     path('list',views.VotingListView, name="list"), 
     path('delete/<int:voting_id>',views.VotingDeleteView , name="votingDelete"),
     path('edit/<int:voting_id>',views.VotingEditView , name="votingEdit"),
+    path('create',views.VotingCreateView , name="votingCreate")
 
 ]
