@@ -1,5 +1,6 @@
 import random
 import itertools
+from django.forms import ValidationError
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -20,7 +21,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
+from voting.models import QuestionType, Voting, Question, QuestionOption
 from datetime import datetime
 
 class VotingModelTestCase(BaseTestCase):
@@ -413,3 +414,36 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
+
+
+class QuestionModelTest(TestCase):
+
+    def setUp(self):
+        self.question = Question.objects.create(desc="Pregunta de prueba", type=QuestionType.NORMAL)
+
+    def test_question_creation(self):
+        self.assertEqual(self.question.desc, "Pregunta de prueba")
+        self.assertEqual(self.question.type, QuestionType.NORMAL)
+
+    def test_binary_question_creation(self):
+        binary_question = Question.objects.create(desc="Pregunta binaria", type=QuestionType.BINARY)
+        self.assertTrue(binary_question.options.filter(option="Sí").exists())
+        self.assertTrue(binary_question.options.filter(option="No").exists())
+
+    def test_ranking_question_validation(self):
+        with self.assertRaises(ValidationError):
+            ranking_question = Question.objects.create(desc="Pregunta ranking", type=QuestionType.RANKING)
+            ranking_question.save()  # Debe fallar
+
+class QuestionOptionModelTest(TestCase):
+
+    def setUp(self):
+        self.question = Question.objects.create(desc="Pregunta de prueba", type=QuestionType.NORMAL)
+
+    def test_question_option_creation(self):
+        option = QuestionOption.objects.create(question=self.question, option="Opción 1")
+        self.assertEqual(option.option, "Opción 1")
+
+    def test_question_option_number_assignment(self):
+        option = QuestionOption.objects.create(question=self.question, option="Opción 2")
+        self.assertEqual(option.number, 2)  
