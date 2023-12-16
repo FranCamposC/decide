@@ -27,7 +27,6 @@
    <h1 style="text-align:center ;">Listado de votaciones</h1>
    <div class="row">
     
-    {%if user_passes%}
        {% for object in votings %}
             <div class="col-md-4">
                 <br>
@@ -44,6 +43,5 @@
                 </div>
             </div>
        {% endfor %}
-    {%endif%}
     </div>
 {%endblock%}
