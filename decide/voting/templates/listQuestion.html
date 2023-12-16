@@ -23,12 +23,15 @@
            </div>
        </nav>
    </div>
-
+   <br>
+    <h1 style="text-align:center ;">Listado de preguntas</h1>
+    <br>
    <div class="row">
 
        {% for object in object_list %}
             <div class="col-md-4">
                 <br>
+
                 <div class="card">
                     
                    <div class="card-body">
@@ -37,7 +40,7 @@
                        <div class="d-flex flex-column">
                            <a href="#" class="btn btn-primary">Editar</a>
                            
-                           <a href="#" class="btn btn-danger">Eliminar</a>
+                           <a href="/voting/question/delete/{{object.pk}}" onclick="return confirm('¿Estás seguro de que quieres eliminar este elemento?');" class="btn btn-danger">Eliminar</a>
                        </div>
                    </div>
                 </div>

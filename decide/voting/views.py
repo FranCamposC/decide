@@ -1,7 +1,10 @@
+from django.contrib.auth.decorators import login_required, user_passes_test
 import django_filters.rest_framework
 from django.conf import settings
 from django.utils import timezone
-from django.shortcuts import get_object_or_404, render, redirect
+
+from django.shortcuts import get_object_or_404, redirect,render
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.views.generic.list import ListView
@@ -16,7 +19,6 @@ from base.models import Auth
 def staff_check(user):
    admin = user.is_staff
    return admin 
-
 
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
@@ -121,15 +123,24 @@ def VotingListView(request):
     return render(request, 'listVotings.html', context)
 
 
-class ListQuestion(ListView):
-    template_name = 'listQuestion.html'
-    queryset = Question.objects.all().order_by('-id')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['questions'] = context['object_list'] 
-        return context
+@login_required
+@user_passes_test(staff_check)
+def ListQuestion(request):
+        census = Question.objects.all()
+        return render(request, 'listQuestion.html', {
+            'object_list':census
+        })
 
+    
+
+@login_required
+@user_passes_test(staff_check)  
+def QuestionDeleteView(request, question_id):
+    question = Question.objects.filter(pk=question_id).first()
+    Question.delete(question)
+
+    return redirect('/voting/question/list')
 
 @login_required
 @user_passes_test(staff_check)   
@@ -139,3 +150,56 @@ def VotingDeleteView(request,voting_id):
     Voting.delete(voting)
 
     return redirect('/voting/list')
+
+@login_required
+@user_passes_test(staff_check)
+def VotingCreateView(request):
+    questions = Question.objects.all()
+
+    if request.method == 'POST':
+
+        name = request.POST.get('name')
+        desc = request.POST.get('desc')
+        question = request.POST.get('question')
+        question = Question.objects.get(pk=question)
+
+        voting = Voting(name=name, desc=desc, question=question)
+        voting.save()
+
+
+        return redirect('/voting/list' )
+    return render(request, 'createVoting.html', {
+        'questions': questions
+    })
+
+@login_required
+@user_passes_test(staff_check) 
+def VotingEditView(request, voting_id):
+    voting = Voting.objects.filter(pk=voting_id).first()
+    questions = Question.objects.all()
+
+    if request.method == 'POST':
+        # get data from the form
+        name = request.POST.get('name')
+        desc = request.POST.get('desc')
+        question = request.POST.get('question')
+
+        # update the product
+        if name != None and name != '':
+            voting.name = name
+        if desc != None and desc != '':
+            voting.desc = desc
+        if question != None and question != '':
+            question = Question.objects.get(pk=question)
+            voting.question = question
+
+        # save the product
+        voting.save()
+
+        # redirect to the same page after saving
+        return redirect('/voting/list')
+
+    return render(request, 'votingEdit.html', {
+        'voting': voting,
+        'questions': questions
+    })
