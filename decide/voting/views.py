@@ -142,6 +142,7 @@ def QuestionDeleteView(request, question_id):
 
     return redirect('/voting/question/list')
 
+
 @login_required
 @user_passes_test(staff_check)   
 def VotingDeleteView(request,voting_id):
@@ -150,3 +151,36 @@ def VotingDeleteView(request,voting_id):
     Voting.delete(voting)
 
     return redirect('/voting/list')
+
+@login_required
+@user_passes_test(staff_check)   
+def createQuestion(request):
+
+    if request.method == 'POST':
+
+        numero= request.POST.get("number")
+
+
+
+        return redirect("/voting/question/create/"+ str(numero))
+    return render(request, 'numberAnswer.html', {
+
+    })
+
+
+def auxCreateQuestion(request, numero):
+    numero_range = range(numero)
+    if request.method == 'POST':
+        desc=request.POST.get("desc")
+        q=Question.objects.create(desc=desc)
+        Question.save(q)
+        for n in range(numero):
+            ans= request.POST.get("ans_"+ str(n))
+            respuesta= QuestionOption.objects.create(option=ans,question=q,number=n+1)   
+            QuestionOption.save(respuesta)
+
+        return redirect('/voting/question/list')
+    return render(request, 'createQuestion.html', {  
+        "numero":numero_range
+    })
+
