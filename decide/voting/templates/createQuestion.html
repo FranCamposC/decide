@@ -34,11 +34,12 @@
             </div>
 
             <div class="form-group" style="padding: 25px; padding-bottom: 0px;">
-            <h4>Respuestas
+            <h4>Respuestas:
                 {% for n in numero%}
+                <br>
                 <br>    
                 <div class="form-group">
-                    <p>ans_{{n}}</p>
+                    <h6>Respuesta {{n}}</h6>
                     <input id="ans_{{n}}" type="text" name="ans_{{n}}" class="form-control" placeholder="Respuestas">
                 </div>   
             {% endfor %}
