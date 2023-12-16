@@ -176,8 +176,11 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
-
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 # number of bits for the key, all auths should use the same number of bits
 KEYBITS = 256
 
