@@ -2,10 +2,14 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 import django_filters.rest_framework
 from django.conf import settings
 from django.utils import timezone
+
 from django.shortcuts import get_object_or_404, redirect,render
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.views.generic.list import ListView
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 
 from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer
@@ -15,6 +19,7 @@ from base.models import Auth
 def staff_check(user):
    admin = user.is_staff
    return admin 
+
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
     serializer_class = VotingSerializer
@@ -107,6 +112,16 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
         return Response(msg, status=st)
     
 
+@login_required
+@user_passes_test(staff_check)
+def VotingListView(request):
+    templates_name= "listVotings.html"
+    votings = Voting.objects.all()
+    context = {
+        'votings': votings
+    }
+    return render(request, 'listVotings.html', context)
+
 
 
 @login_required
@@ -126,3 +141,12 @@ def QuestionDeleteView(request, question_id):
     Question.delete(question)
 
     return redirect('/voting/question/list')
+
+@login_required
+@user_passes_test(staff_check)   
+def VotingDeleteView(request,voting_id):
+    voting = Voting.objects.filter(pk=voting_id).first()
+
+    Voting.delete(voting)
+
+    return redirect('/voting/list')

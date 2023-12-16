@@ -140,6 +140,4 @@ def LoginAdmin(request):
             })
         else:
             login(request,usuario)
-            return redirect('/user/admin')
-
-         
+            return redirect('/user/admin') 
