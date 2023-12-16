@@ -152,6 +152,27 @@ def VotingDeleteView(request,voting_id):
     return redirect('/voting/list')
 
 @login_required
+@user_passes_test(staff_check)
+def VotingCreateView(request):
+    questions = Question.objects.all()
+
+    if request.method == 'POST':
+
+        name = request.POST.get('name')
+        desc = request.POST.get('desc')
+        question = request.POST.get('question')
+        question = Question.objects.get(pk=question)
+
+        voting = Voting(name=name, desc=desc, question=question)
+        voting.save()
+
+
+        return redirect('/voting/list' )
+    return render(request, 'createVoting.html', {
+        'questions': questions
+    })
+
+@login_required
 @user_passes_test(staff_check) 
 def VotingEditView(request, voting_id):
     voting = Voting.objects.filter(pk=voting_id).first()
