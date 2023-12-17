@@ -390,6 +390,14 @@ class QuestionsTests(StaticLiveServerTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_list_census_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('questionList')
+        response = self.client.get(url)
+        self.assertNotEqual(response.status_code, 200)
+
+
 
 
     def createQuestionSuccess(self):
