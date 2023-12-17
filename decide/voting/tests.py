@@ -533,3 +533,10 @@ class VotingTests(BaseTestCase):
         url = reverse('list')
         response = self.client.get(url)
         self.assertNotEqual(response.status_code, 200)
+
+    def test_create_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post(reverse('votingCreate'),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting = Voting.objects.filter(name="nombre").first()
+        self.assertIsNotNone(voting)
