@@ -40,7 +40,7 @@
                        <h4 class="card-title">{{object.desc}}</h4>
                        <hr>
                        <div class="d-flex flex-column">
-                           <a href="#" class="btn btn-primary">Editar</a>
+                           <a href="/voting/question/edit/{{object.pk}}" class="btn btn-primary">Editar</a>
                            
                            <a href="/voting/question/delete/{{object.pk}}" onclick="return confirm('¿Estás seguro de que quieres eliminar este elemento?');" class="btn btn-danger">Eliminar</a>
                        </div>
