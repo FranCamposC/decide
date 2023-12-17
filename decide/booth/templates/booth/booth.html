@@ -124,20 +124,21 @@
         <div v-if="!signup">
             <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
             <h2>[[ voting.question.desc ]]</h2>
-            <div v-if="ranked">
-                <form v-for="opt in voting.question.options" :key="opt.number">
-                    <div class="form-group">
-                        <span class="option-element">[[ opt.option ]]:</span>
-                        <input type="number"
-                                    min="1" 
-                                    max="3"
-                                    :id="'q' + opt.number"
-                                    name="question"
-                                    v-model="selected[opt.number]"
-                                    :style="{ width: 50 + 'px' }">
+            
+                <div v-if="voting.question.type == 'RANKING'">
+                    <form v-for="opt in voting.question.options" :key="opt.number">
+                        <div class="form-group">
+                            <span class="option-element">[[ opt.option ]]:</span>
+                            <input type="number"
+                                        min="1" 
+                                        max="3"
+                                        :id="'q' + opt.number"
+                                        name="question"
+                                        v-model="selected[opt.number]"
+                                        :style="{ width: 50 + 'px' }">
                         </div>
-                </form>
-            </div>
+                    </form>
+                </div>
             <div v-else>
                 <form v-for="opt in voting.question.options" :key="opt.number">
                     <div class="form-group">
@@ -183,10 +184,13 @@
         createApp({
             delimiters: ['[[', ']]'],
             data() {
+                let selected="";
+                if(voting.question.type == "RANKING"){
+                    selected=this.initSelected();
+                }
                 return {
                     voting: voting,
-                    ranked: voting.ranked,
-                    selected: this.initSelected(),
+                    selected: selected,
                     signup: true,
                     successVote: false,
                     alertShow: false,
@@ -321,7 +325,7 @@
                     return cipher;
                 },
                 correctVoting() {
-                    if(this.ranked) {
+                    if(this.voting.question.type=='RANKING') {
                         res = this.selected;
                         const list = []; 
                         for (let v in res) {
@@ -345,7 +349,8 @@
                 decideSend(evt) {
                     evt.preventDefault();
                     badVote = this.correctVoting();
-                    this.selected = this.parseSelected();
+                    //this.selected = this.parseSelected();
+                    console.log(this.selected)
                     var v = this.decideEncrypt();
                     var data = {
                         vote: {a: v.alpha.toString(), b: v.beta.toString()},
