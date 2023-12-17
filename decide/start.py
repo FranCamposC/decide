@@ -19,13 +19,13 @@ from census.models import Census
 fake = Faker("es_ES")
 
 
-class UserFactory(DjangoModelFactory):
-    class Meta:
-        model = User
+# class UserFactory(DjangoModelFactory):
+#     class Meta:
+#         model = User
 
-    username = LazyAttribute(lambda x: fake.user_name()+str(random.randint(1,100)))
-    email = fake.email()
-    password = TextField(default="1234")
+#     username = LazyAttribute(lambda x: fake.user_name()+str(random.randint(1,100)))
+#     email = fake.email()
+#     password = TextField(default="1234")
 
 preguntas_predefinidas=[
     {"question_desc": "¿Cual es tu opinion sobre el cambio climatico?",
@@ -131,7 +131,7 @@ def cambiar_url_local(url_nueva):
 
 
 if __name__ == '__main__':
-    print("Bienvenido al script de inicio de la aplicación Decide")
+    print("Bienvenido al script de configuración de inicio de la aplicación Decide")
     time.sleep(1)
     url=input("¿Es esta la url en la que desea ejecutar la aplicación? "+local_url+" (si/no): ") 
     if url=="no":
@@ -147,77 +147,95 @@ if __name__ == '__main__':
             print("Url cambiada con exito")
     else:
         print("Url no cambiada")
-    print("Aplicando migraciones...")
-    time.sleep(2)
-    os.system("python manage.py makemigrations")
-    os.system("python manage.py migrate")
-    print("Migraciones aplicadas",end="\n\n")
-    print("Vaciando base de datos...")
-    os.system("python manage.py flush --no-input")
-    print("Base de datos vaciada,",end="\n\n")
-    print("Comienzo de las migraciones...")
-    time.sleep(2)
-    print("Creando usuarios...")
-    time.sleep(2)
 
-    for _ in range(50):
-        user= UserFactory.create()
-        print(f"Usuario creado: {user.username}")
-    admin = User.objects.create_superuser(username="admin", email="a@a.com",password="admin")
-    if admin:
-        print(f"Usuario admin creado: Usuario= {admin.username} Contraseña = {admin.password}")
-
-    print("Usuarios creados con exito",end="\n\n")
-    time.sleep(2)
-    print("Creando preguntas...")
-    time.sleep(2)
-
-    for pregunta in preguntas_predefinidas:
-            q=Question.objects.create(desc=pregunta["question_desc"])
-            print(f"Pregunta creada: {q.desc}")
-            for o in pregunta["opciones"]:
-                option = QuestionOption.objects.create(
-                question=q,
-                number=o["number"], 
-                option=o["option"])
-                print(f"Opcion creada: {option.option}")
-
-    print("Preguntas creadas con exito",end="\n\n")
-    time.sleep(2)
-    print("Creando votaciones...")
-    time.sleep(2)
-    authentication=Auth.objects.create(name="local", url=local_url)
-    print(f"Auth local creada: {local_url}",end="\n\n")
-
-    time.sleep(2)
-
-    for nombre_votacion in nombres_votaciones:
-        voting_instance = Voting.objects.create(
-            name=nombre_votacion,
-            question=random.choice(preguntas),
-            ranked=random.choice([True, False]),
-        )
-        voting_instance.auths.add(authentication)
-        print(f"Votacion creada: {voting_instance.name}")
-    print("Votaciones creadas con exito",end="\n\n")
-
-    time.sleep(2)
-    print("Creando censos...")
-    time.sleep(2)
-
-    for votacion in votaciones:
-        usuarios_votacion=random.sample(list(usuarios),5)
-        for usuario in usuarios_votacion:
-            censo = Census.objects.create(
-                voting_id=votacion.id,
-                voter_id=usuario.id,
-            )
-            print(f"Usuario {usuario.username} agregado a la votacion {votacion.name}")
-
-    print("Migraciones aplicadas")
-
-    respuesta=input("¿Desea ejecutar la aplicación? (si/no):")
-    if respuesta=="si":
-        os.system("python manage.py runserver")
+    migr=input("¿Desea aplicar las migraciones? (si/no): ")
+    if migr=="si":
+        print("Aplicando migraciones...")
+        time.sleep(2)
+        os.system("python manage.py makemigrations")
+        os.system("python manage.py migrate")
+        print("Migraciones aplicadas",end="\n\n")
     else:
-        print("Aplicación no ejecutada")
+        print("Migraciones no aplicadas",end="\n\n")
+    db=input("¿Desea vaciar la base de datos? (si/no): ")
+    if db=="si":
+        print("Vaciando base de datos...")
+        os.system("python manage.py flush --no-input")
+        print("Base de datos vaciada,",end="\n\n")
+    else:
+        print("Base de datos no vaciada,",end="\n\n")
+    time.sleep(2)
+    pobl=input("¿Desea poblar la base de datos? (si/no): ")
+    if pobl=="si":
+
+        print("Creando usuarios...")
+        time.sleep(2)
+
+        for _ in range(50):
+            user= User.objects.create_user(username=fake.user_name(), email=fake.email(),password="1234")
+            print(f"Usuario creado: {user.username}")
+        admin = User.objects.create_superuser(username="admin", email="a@a.com",password="admin")
+        if admin:
+            print(f"Usuario admin creado: Usuario= {admin.username} Contraseña = admin")
+
+        print("Usuarios creados con exito",end="\n\n")
+        time.sleep(2)
+        print("Creando preguntas...")
+        time.sleep(2)
+
+        for pregunta in preguntas_predefinidas:
+                q=Question.objects.create(desc=pregunta["question_desc"])
+                print(f"Pregunta creada: {q.desc}")
+                for o in pregunta["opciones"]:
+                    option = QuestionOption.objects.create(
+                    question=q,
+                    number=o["number"], 
+                    option=o["option"])
+                    print(f"Opcion creada: {option.option}")
+
+        print("Preguntas creadas con exito",end="\n\n")
+        time.sleep(2)
+        print("Creando votaciones...")
+        time.sleep(2)
+        authentication=Auth.objects.create(name="local", url=local_url)
+        print(f"Auth local creada: {local_url}",end="\n\n")
+
+        time.sleep(2)
+
+        for nombre_votacion in nombres_votaciones:
+            voting_instance = Voting.objects.create(
+                name=nombre_votacion,
+                question=random.choice(preguntas),
+                ranked=random.choice([True, False]),
+            )
+            voting_instance.auths.add(authentication)
+            print(f"Votacion creada: {voting_instance.name}")
+        print("Votaciones creadas con exito",end="\n\n")
+
+        time.sleep(2)
+        print("Creando censos...")
+        time.sleep(2)
+
+        for votacion in votaciones:
+            usuarios_votacion=random.sample(list(usuarios),5)
+            for usuario in usuarios_votacion:
+                censo = Census.objects.create(
+                    voting_id=votacion.id,
+                    voter_id=usuario.id,
+                )
+                print(f"Usuario {usuario.username} agregado a la votacion {votacion.name}")
+
+        print("Migraciones aplicadas")
+
+        respuesta=input("¿Desea ejecutar la aplicación? (si/no):")
+        if respuesta=="si":
+            os.system("python manage.py runserver")
+        else:
+            print("Aplicación no ejecutada")
+    else:
+        print("Base de datos no poblada")
+        respuesta=input("¿Desea ejecutar la aplicación? (si/no):")
+        if respuesta=="si":
+            os.system("python manage.py runserver")
+        else:
+            print("Aplicación no ejecutada")
