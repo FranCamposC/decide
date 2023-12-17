@@ -411,7 +411,7 @@ class QuestionsTests(StaticLiveServerTestCase):
         question = Question.objects.filter(desc="descripcion").first()
         self.assertIsNone(question)
     
-    def test_delete_census(self):
+    def test_delete_question(self):
         
         user = User.objects.get(username='admin')
         self.client.force_login(user)
@@ -419,6 +419,15 @@ class QuestionsTests(StaticLiveServerTestCase):
         response = self.client.delete(url)
         question = Question.objects.filter(pk=self.question.id).first()
         self.assertIsNone(question)
+        
+    def test_delete_unauthorised(self):
+
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('delete', args=[self.question.id])
+        response = self.client.delete(url)
+        question = Question.objects.filter(pk=self.question.id).first()
+        self.assertIsNotNone(question)
 
 
 
