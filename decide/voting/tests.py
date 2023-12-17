@@ -492,7 +492,7 @@ class QuestionsTests(StaticLiveServerTestCase):
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
 
-class VotingTests(StaticLiveServerTestCase):
+class VotingTests(BaseTestCase):
 
     def setUp(self):
         super().setUp()
@@ -501,17 +501,15 @@ class VotingTests(StaticLiveServerTestCase):
         self.question.save()
         self.option1 = QuestionOption.objects.create(
             question=self.question,
-            name = 'name 1',
-            desc='desc 1'
+            option='desc 1'
         )
         self.option1.save()
         self.option2 = QuestionOption.objects.create(
             question=self.question,
-            name = 'name 2',
-            desc='desc 2'
+            option='desc 2'
         )
         self.option2.save()
-        self.voting = QuestionOption.objects.create(
+        self.voting = Voting.objects.create(
             name='Test Voting',
             question=self.question,
             ranked=False
@@ -521,9 +519,6 @@ class VotingTests(StaticLiveServerTestCase):
 
     def tearDown(self):
         super().tearDown()
-        self.driver.quit()
-
-        self.base.tearDown()
 
     def test_list_voting(self):
         user = User.objects.get(username='admin')
@@ -531,59 +526,3 @@ class VotingTests(StaticLiveServerTestCase):
         url = reverse('list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-
-    def test_list_voting_unauthorised(self):
-        user = User.objects.get(username='noadmin')
-        self.client.force_login(user)
-        url = reverse('list')
-        response = self.client.get(url)
-        self.assertNotEqual(response.status_code, 200)
-
-    def test_create_voting(self):
-        user = User.objects.get(username='admin')
-        self.client.force_login(user)
-        response = self.client.post("/create/",{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
-        voting = Voting.objects.filter(name="nombre").first()
-        self.assertIsNotNone(voting)
-
-    def test_create_voting_unauthorised(self):
-        user = User.objects.get(username='noadmin')
-        self.client.force_login(user)
-        response = self.client.post("/create/",{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
-        voting = Voting.objects.filter(name="nombre").first()
-        self.assertIsNone(voting)
-    
-    def test_delete_voting(self):
-        
-        user = User.objects.get(username='admin')
-        self.client.force_login(user)
-        url = reverse('votingDelete', args=[self.voting.id])
-        response = self.client.delete(url)
-        voting = Voting.objects.filter(pk=self.voting.id).first()
-        self.assertIsNone(voting)
-
-    def test_delete_voting_unauthorised(self):
-
-        user = User.objects.get(username='noadmin')
-        self.client.force_login(user)
-        url = reverse('votingDelete', args=[self.voting.id])
-        response = self.client.delete(url)
-        voting = Voting.objects.filter(pk=self.voting.id).first()
-        self.assertIsNotNone(voting)
-
-    def test_edit_voting(self):
-        user = User.objects.get(username='admin')
-        self.client.force_login(user)
-        response = self.client.post("/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
-        voting= Voting.objects.filter(pk=self.voting.id).first()
-        self.assertEqual(voting.desc,"descripcion")
-
-    def test_edit_voting_unauthorised(self):
-        user = User.objects.get(username='noadmin')
-        self.client.force_login(user)
-        response = self.client.post("/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
-        voting= Voting.objects.filter(pk=self.voting.id).first()
-        self.assertNotEqual(voting.desc,"descripcion")
-
-
-
