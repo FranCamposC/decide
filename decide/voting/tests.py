@@ -571,3 +571,10 @@ class VotingTests(BaseTestCase):
         response = self.client.post("/voting/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
         voting= Voting.objects.filter(pk=self.voting.id).first()
         self.assertEqual(voting.desc,"descripcion")
+
+    def test_edit_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting= Voting.objects.filter(pk=self.voting.id).first()
+        self.assertNotEqual(voting.desc,"descripcion")
