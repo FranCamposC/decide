@@ -73,11 +73,12 @@ def getParsedCensus():
     res = {}
     census = Census.objects.all()
     for c in census:
-        voting = Voting.objects.get(pk=c.voting_id)
-        voter = User.objects.get(pk=c.voter_id)
-        if voting not in res.keys():
-            res[voting] = []
-        res[voting].append(voter)
+        voting = Voting.objects.filter(pk=c.voting_id).first()
+        voter = User.objects.filter(pk=c.voter_id).first()
+        if not voting == None or not voter == None:
+            if voting not in res.keys():
+                res[voting] = []
+            res[voting].append(voter)
     return res
 
 
@@ -119,7 +120,7 @@ def editCensus(request, voting_id):
     census = Census.objects.filter(voting_id=voting_id)
     selectedUsers = []
     for c in census:
-        selectedUsers.append(User.objects.get(pk=c.voter_id))
+        selectedUsers.append(User.objects.filter(pk=c.voter_id).first())
     if request.method == 'POST':
         user = request.POST.getlist('u')
 
