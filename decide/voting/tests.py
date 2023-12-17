@@ -429,12 +429,19 @@ class QuestionsTests(StaticLiveServerTestCase):
         question = Question.objects.filter(pk=self.question.id).first()
         self.assertIsNotNone(question)
 
-    def test_edit_delete(self):
+    def test_edit_question(self):
         user = User.objects.get(username='admin')
         self.client.force_login(user)
         response = self.client.post("/voting/question/edit/"+str(self.question.id),{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2"})
         question= Question.objects.filter(pk=self.question.id).first()
         self.assertEqual(question.desc,"descripcion")
+
+    def test_edit_question_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/question/edit/"+str(self.question.id),{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2"})
+        question= Question.objects.filter(pk=self.question.id).first()
+        self.assertNotEqual(question.desc,"descripcion")
 
 
 
