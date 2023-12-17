@@ -160,6 +160,19 @@ class CensusTestCase(BaseTestCase):
             census = Census.objects.filter(voting_id=self.voting.id, voter_id=voter).first()
             self.assertIsNone(census)
 
+    def test_delete_census(self):
+        voters = [1, 2, 3]
+        for v in voters:
+            census = Census.objects.create(voting_id=self.voting.id,voter_id=v)
+            census.save()
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('delete_census', args=[self.voting.id])
+        response = self.client.delete(url)
+        for voter in voters:
+            census = Census.objects.filter(voting_id=self.voting.id, voter_id=voter).first()
+            self.assertIsNone(census)
+
 class CensusTest(StaticLiveServerTestCase):
     def setUp(self):
         #Load base test functionality for decide
