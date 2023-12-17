@@ -555,3 +555,12 @@ class VotingTests(BaseTestCase):
         response = self.client.delete(url)
         voting = Voting.objects.filter(pk=self.voting.id).first()
         self.assertIsNone(voting)
+
+    def test_delete_voting_unauthorised(self):
+
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('votingDelete', args=[self.voting.id])
+        response = self.client.delete(url)
+        voting = Voting.objects.filter(pk=self.voting.id).first()
+        self.assertIsNotNone(voting)
