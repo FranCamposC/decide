@@ -15,6 +15,9 @@ from base import mods
 from base.tests import BaseTestCase
 from datetime import datetime
 
+from django.test import TestCase, Client
+from django.urls import reverse
+from voting.models import Voting, Question, QuestionOption
 
 class CensusTestCase(BaseTestCase):
 
@@ -22,6 +25,39 @@ class CensusTestCase(BaseTestCase):
         super().setUp()
         self.census = Census(voting_id=1, voter_id=1)
         self.census.save()
+
+        self.question = Question.objects.create(desc='Test Question')
+        self.question.save()
+        self.option1 = QuestionOption.objects.create(
+            question=self.question,
+            number=1,
+            option='Option 1'
+        )
+        self.option1.save()
+        self.option2 = QuestionOption.objects.create(
+            question=self.question,
+            number=2,
+            option='Option 2'
+        )
+        self.option2.save()
+        self.voting = Voting.objects.create(
+            name='Test Voting',
+            question=self.question,
+            ranked=False
+        )
+        self.voting.save()
+        self.user1 = User.objects.create(
+            username='User 1'
+        )
+        self.user1.save()
+        self.user2 = User.objects.create(
+            username='User 2'
+        )
+        self.user2.save()
+        self.user3 = User.objects.create(
+            username='User 3'
+        )
+        self.user3.save()
 
     def tearDown(self):
         super().tearDown()
