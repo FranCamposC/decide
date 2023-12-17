@@ -186,6 +186,21 @@ class CensusTestCase(BaseTestCase):
             census = Census.objects.filter(voting_id=self.voting.id, voter_id=voter).first()
             self.assertIsNotNone(census)
 
+    def test_edit_census(self):
+        voters = [self.user1.id, self.user3.id]
+        newVoters = [self.user1.id, self.user2.id]
+        for v in voters:
+            census = Census.objects.create(voting_id=self.voting.id,voter_id=v)
+            census.save()
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('edit_census', args=[self.voting.id])
+        response = self.client.post(url, {'u': newVoters})
+        for voter in newVoters:
+            census = Census.objects.filter(voting_id=self.voting.id, voter_id=voter).first()
+            self.assertIsNotNone(census)
+        self.assertIsNone(Census.objects.filter(voting_id=self.voting.id, voter_id=self.user3.id).first())
+
 class CensusTest(StaticLiveServerTestCase):
     def setUp(self):
         #Load base test functionality for decide
