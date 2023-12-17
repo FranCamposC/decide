@@ -526,3 +526,10 @@ class VotingTests(BaseTestCase):
         url = reverse('list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_list_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('list')
+        response = self.client.get(url)
+        self.assertNotEqual(response.status_code, 200)
