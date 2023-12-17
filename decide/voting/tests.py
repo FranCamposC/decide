@@ -404,7 +404,12 @@ class QuestionsTests(StaticLiveServerTestCase):
         question = Question.objects.filter(desc="descripcion").first()
         self.assertIsNotNone(question)
 
-
+    def test_create_question_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/question/create/3",{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2",'ans_2': "opcion3"})
+        question = Question.objects.filter(desc="descripcion").first()
+        self.assertIsNone(question)
 
 
 
