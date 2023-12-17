@@ -118,6 +118,17 @@ class CensusTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Census.objects.count())
 
+    def test_list_census(self):
+        Census.delete(Census.objects.all().first())
+        voters = [self.user1.id, self.user2.id, self.user3.id]
+        for v in voters:
+            census = Census.objects.create(voting_id=self.voting.id,voter_id=v)
+            census.save()
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('census_list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
 
 class CensusTest(StaticLiveServerTestCase):
     def setUp(self):
