@@ -12,6 +12,7 @@ urlpatterns = [
     path('question/create/',views.createQuestion, name="createQuestion"),
     path('question/create/<int:numero>',views.auxCreateQuestion, name="createQuestion2"),
     path('edit/<int:voting_id>',views.VotingEditView , name="votingEdit"),
-    path('create',views.VotingCreateView , name="votingCreate")
+    path('create',views.VotingCreateView , name="votingCreate"),
+    path('question/edit/<int:question_id>',views.editQuestion, name="editQuestion"),
 
 ]

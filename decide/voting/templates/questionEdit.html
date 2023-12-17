@@ -25,27 +25,26 @@
    </div>
    <br>
 <div class="col">
-    <h1 style="text-align:center ; ">Nueva pregunta</h1>
+    <h1 style="text-align:center ; ">Edita esta pregunta</h1>
         <form method="post" enctype="multipart/form-data"> {% csrf_token %}
             <div class="form-group" style="padding: 25px; padding-bottom: 0px;">
             <h4 >Descripción
-                <input id="desc" type="text" name="desc" class="form-control" placeholder="Descripción">
+                <input id="desc" type="text" name="desc" class="form-control" placeholder="Descripción" required>
             </h4>
             </div>
 
             <div class="form-group" style="padding: 25px; padding-bottom: 0px;">
-            <h4>Respuestas:
+            <h4>Respuestas:</h4>
                 {% for n in numero%}
                 <br>
                 <br>    
                 <div class="form-group">
                     <h6>Respuesta {{n}}</h6>
-                    <input id="ans_{{n}}" type="text" name="ans_{{n}}" class="form-control" placeholder="Respuestas">
+                    <input id="ans_{{n}}" type="text" name="ans_{{n}}" class="form-control" placeholder="Respuestas" required>
                 </div>   
             {% endfor %}
-            
-            
-            </h4>
+
+        
             
             <div style="padding: 25px; padding-bottom: 0px;">
             <button type="submit" class="btn btn-primary">Registrar</button>
@@ -53,4 +52,26 @@
         </form>
 </div>
 
+
+<script>
+    window.onload = function(){
+ 
+        var desc = "{{ question.desc }}"; 
+        document.getElementById('desc').value = desc;
+        var numero="{{numero}}"
+        var option ="{{options}}"
+        option = option.replaceAll("&#x27;","");
+        option = option.replaceAll("[","");
+        option = option.replaceAll("]","");
+        var arr = option.split(", "); 
+        for (let n in arr) {
+            let ans_n = arr[n];
+            console.log(ans_n)
+            console.log(arr)
+            document.getElementById('ans_' + n).value = ans_n;
+        }
+
+ 
+    };
+ </script>
 {% endblock %}

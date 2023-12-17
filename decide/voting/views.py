@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django_filters.rest_framework
 from django.conf import settings
@@ -236,4 +237,40 @@ def VotingEditView(request, voting_id):
     return render(request, 'votingEdit.html', {
         'voting': voting,
         'questions': questions
+    })
+
+@login_required
+@user_passes_test(staff_check) 
+def editQuestion(request, question_id):
+    try:
+        question = Question.objects.get(pk=question_id)
+    except Question.DoesNotExist:
+        raise Http404("La pregunta no existe")
+    option=QuestionOption.objects.filter(question=question)
+    num_options = range(len(option))
+    if request.method == 'POST':
+        desc = request.POST.get("desc")
+        question.desc = desc
+        question.save()
+
+        num_options = len(QuestionOption.objects.filter(question=question))
+
+
+        for n in range(int(num_options)):
+            ans = request.POST.get("ans_" + str(n))
+            if ans: 
+                respuesta = QuestionOption.objects.get(question=question, number=n+1)
+                respuesta.option = ans
+                respuesta.save()
+
+        return redirect('/voting/question/list')
+
+    options = QuestionOption.objects.filter(question=question)
+    ls=[]
+    for o in options:
+        ls.append(o.option)
+    return render(request, 'questionEdit.html', {  
+        "question": question,
+        "options": ls,
+        "numero":num_options
     })
