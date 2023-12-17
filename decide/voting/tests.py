@@ -1,5 +1,6 @@
 import random
 import itertools
+from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -359,6 +360,21 @@ class QuestionsTests(StaticLiveServerTestCase):
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
+        self.question = Question.objects.create(desc='Test Question')
+        self.question.save()
+        self.option1 = QuestionOption.objects.create(
+            question=self.question,
+            number=1,
+            option='Option 1'
+        )
+        self.option1.save()
+        self.option2 = QuestionOption.objects.create(
+            question=self.question,
+            number=2,
+            option='Option 2'
+        )
+        self.option2.save()
+
         super().setUp()
 
     def tearDown(self):
@@ -366,6 +382,15 @@ class QuestionsTests(StaticLiveServerTestCase):
         self.driver.quit()
 
         self.base.tearDown()
+
+    def test_list_questions(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('questionList')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+
 
     def createQuestionSuccess(self):
         self.cleaner.get(self.live_server_url+"/admin/login/?next=/admin/")
@@ -413,3 +438,4 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
+
