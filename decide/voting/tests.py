@@ -547,3 +547,11 @@ class VotingTests(BaseTestCase):
         response = self.client.post(reverse('votingCreate'),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
         voting = Voting.objects.filter(name="nombre").first()
         self.assertIsNone(voting)
+
+    def test_delete_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('votingDelete', args=[self.voting.id])
+        response = self.client.delete(url)
+        voting = Voting.objects.filter(pk=self.voting.id).first()
+        self.assertIsNone(voting)
