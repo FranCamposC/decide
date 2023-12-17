@@ -1,6 +1,6 @@
 # forms.py
 from django import forms
-from .models import Question, QuestionOption, QuestionType
+from .models import Question, QuestionOption
 
 class QuestionForm(forms.ModelForm):
     class Meta:
@@ -14,7 +14,7 @@ class QuestionForm(forms.ModelForm):
         total_forms = int(self.data.get('options-TOTAL_FORMS'))
         filled_forms = 0
 
-        if question_type == QuestionType.BINARY:
+        if question_type == "BINARY":
             total_forms = int(self.data.get('options-TOTAL_FORMS'))
             valid_binary_options = {'Sí', 'No'}
 
@@ -27,10 +27,10 @@ class QuestionForm(forms.ModelForm):
             # Verificar que los formularios no esten en blanco
             if self.data.get(f'options-{form_index}-option'):
                 filled_forms += 1
-        if question_type == QuestionType.NORMAL and int(filled_forms) < 2:
+        if question_type == "NORMAL" and int(filled_forms) < 2:
             raise forms.ValidationError('Las preguntas de tipo normal deben tener al menos 2 opciones.')
 
-        if question_type == QuestionType.RANKING and int(filled_forms) < 3:
+        if question_type == "RANKING" and int(filled_forms) < 3:
             raise forms.ValidationError('Las preguntas de tipo ranking deben tener al menos 3 opciones.')
 
         return cleaned_data
