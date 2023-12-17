@@ -540,3 +540,10 @@ class VotingTests(BaseTestCase):
         response = self.client.post(reverse('votingCreate'),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
         voting = Voting.objects.filter(name="nombre").first()
         self.assertIsNotNone(voting)
+
+    def test_create_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post(reverse('votingCreate'),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting = Voting.objects.filter(name="nombre").first()
+        self.assertIsNone(voting)
