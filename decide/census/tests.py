@@ -142,6 +142,15 @@ class CensusTestCase(BaseTestCase):
         response = self.client.get(url)
         self.assertNotEqual(response.status_code, 200)
 
+    def test_create_census(self):
+        voters = [1, 2, 3]
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post(reverse('create_census'), {'v': self.voting.id, 'u': voters})
+        for voter in voters:
+            census = Census.objects.filter(voting_id=self.voting.id, voter_id=voter).first()
+            self.assertIsNotNone(census)
+
 class CensusTest(StaticLiveServerTestCase):
     def setUp(self):
         #Load base test functionality for decide
