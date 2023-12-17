@@ -124,8 +124,19 @@
         <div v-if="!signup">
             <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
             <h2>[[ voting.question.desc ]]</h2>
+                <div v-if="voting.question.type == 'MULTIPLE'">
+                    <form>
+                        <div class="form-group" v-for="opt in voting.question.options" :key="opt.number">
+                            <input type="checkbox" v-model="selected[opt.number]"
+                                :id="'q' + opt.number"
+                                :value="opt.number">
+                                
+                            <label :for="'q' + opt.number">[[ opt.option ]]</label>
+                        </div>
+                    </form>
+                </div>
             
-                <div v-if="voting.question.type == 'RANKING'">
+                <div v-else-if="voting.question.type == 'RANKING'">
                     <form v-for="opt in voting.question.options" :key="opt.number">
                         <div class="form-group">
                             <span class="option-element">[[ opt.option ]]:</span>
@@ -187,6 +198,8 @@
                 let selected="";
                 if(voting.question.type == "RANKING"){
                     selected=this.initSelected();
+                }else if(voting.question.type == "MULTIPLE"){
+                    selected=[];
                 }
                 return {
                     voting: voting,
@@ -324,6 +337,17 @@
                     var cipher = ElGamal.encrypt(this.bigpk, bigmsg);
                     return cipher;
                 },
+                decideEncryptMultiple() {
+                    var encriptVotes = []
+                    for (optNumber in this.selected){
+                        var bigmsg = BigInt.fromJSONObject(optNumber.toString());
+                        var cipher = ElGamal.encrypt(this.bigpk, bigmsg);
+                        var vote = {a: cipher.alpha.toString(), b: cipher.beta.toString()}
+                        encriptVotes.push(vote)
+                    }
+
+                    return encriptVotes;
+                },
                 correctVoting() {
                     if(this.voting.question.type=='RANKING') {
                         res = this.selected;
@@ -348,27 +372,64 @@
                 },
                 decideSend(evt) {
                     evt.preventDefault();
-                    badVote = this.correctVoting();
-                    //this.selected = this.parseSelected();
-                    console.log(this.selected)
-                    var v = this.decideEncrypt();
-                    var data = {
-                        vote: {a: v.alpha.toString(), b: v.beta.toString()},
-                        voting: this.voting.id,
-                        voter: this.user.id,
-                        token: this.token
+                    if (this.voting.question.type == 'MULTIPLE') {
+                        // Convertir el objeto 'selected' en un formato adecuado
+                        let selectedOptions = [];
+                        for (let optNumber in this.selected) {
+                            if (this.selected[optNumber]) {
+                                selectedOptions.push(optNumber);
+                            }
+                        }
+
+                        // Encriptar y enviar las opciones seleccionadas
+                        if (selectedOptions.length > 0) {
+                            let v = this.decideEncryptMultiple();
+                            let data = {
+                                vote: v,
+                                voting: this.voting.id,
+                                voter: this.user.id,
+                                token: this.token
+                            };
+                            console.log(data)
+
+                            this.postData("{% url 'gateway' 'store' '/' %}", data)
+                                .then(data => {
+                                    this.successVote = true;
+                                    this.alertShow = false;
+                                    this.showAlert("success", '{% trans "Congratulations. Your vote has been sent" %}');
+                                })
+                                .catch(error => {
+                                    this.successVote = false;
+                                    this.showAlert("danger", '{% trans "Error: " %}' + error);
+                                });
+                        }
+                    }else{
+                        badVote = this.correctVoting();
+                        //this.selected = this.parseSelected();
+                        
+                        var v = this.decideEncrypt();
+                        
+                        var data = {
+                            vote: {a: v.alpha.toString(), b: v.beta.toString()},
+                            voting: this.voting.id,
+                            voter: this.user.id,
+                            token: this.token
+                        }
+              
+
+                        this.postData("{% url "gateway" "store" "/" %}", data, badVote)
+                            .then(data => {
+                                this.successVote = true;
+                                this.alertShow = false;
+                                this.showAlert("success", '{% trans "Congratulations. Your vote has been sent" %}');
+                            })
+                            .catch(error => {
+                                this.succesVote = false;
+                                this.showAlert("danger", '{% trans "Error: " %}' + error);
+                            });
                     }
-                    this.postData("{% url "gateway" "store" "/" %}", data, badVote)
-                        .then(data => {
-                            this.successVote = true;
-                            this.alertShow = false;
-                            this.showAlert("success", '{% trans "Congratulations. Your vote has been sent" %}');
-                        })
-                        .catch(error => {
-                            this.succesVote = false;
-                            this.showAlert("danger", '{% trans "Error: " %}' + error);
-                        });
-                },
+
+                    },
                 showAlert(lvl, msg) {
                     this.alertLvl = lvl;
                     this.alertMsg = msg;
