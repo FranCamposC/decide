@@ -410,6 +410,15 @@ class QuestionsTests(StaticLiveServerTestCase):
         response = self.client.post("/voting/question/create/3",{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2",'ans_2': "opcion3"})
         question = Question.objects.filter(desc="descripcion").first()
         self.assertIsNone(question)
+    
+    def test_delete_census(self):
+        
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('delete', args=[self.question.id])
+        response = self.client.delete(url)
+        question = Question.objects.filter(pk=self.question.id).first()
+        self.assertIsNone(question)
 
 
 
