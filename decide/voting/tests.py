@@ -390,12 +390,20 @@ class QuestionsTests(StaticLiveServerTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-    def test_list_census_unauthorised(self):
+    def test_list_question_unauthorised(self):
         user = User.objects.get(username='noadmin')
         self.client.force_login(user)
         url = reverse('questionList')
         response = self.client.get(url)
         self.assertNotEqual(response.status_code, 200)
+
+    def test_create_question(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/question/create/3",{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2",'ans_2': "opcion3"})
+        question = Question.objects.filter(desc="descripcion").first()
+        self.assertIsNotNone(question)
+
 
 
 
