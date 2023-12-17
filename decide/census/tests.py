@@ -201,6 +201,21 @@ class CensusTestCase(BaseTestCase):
             self.assertIsNotNone(census)
         self.assertIsNone(Census.objects.filter(voting_id=self.voting.id, voter_id=self.user3.id).first())
 
+    def test_edit_census_unauthorised(self):
+        voters = [self.user1.id, self.user3.id]
+        newVoters = [self.user1.id, self.user2.id]
+        for v in voters:
+            census = Census.objects.create(voting_id=self.voting.id,voter_id=v)
+            census.save()
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('edit_census', args=[self.voting.id])
+        response = self.client.post(url, {'u': newVoters})
+        for voter in voters:
+            census = Census.objects.filter(voting_id=self.voting.id, voter_id=voter).first()
+            self.assertIsNotNone(census)
+        self.assertIsNone(Census.objects.filter(voting_id=self.voting.id, voter_id=self.user2.id).first())
+
 class CensusTest(StaticLiveServerTestCase):
     def setUp(self):
         #Load base test functionality for decide
