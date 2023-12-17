@@ -7,17 +7,19 @@ from django.forms import ValidationError
 from base import mods
 from base.models import Auth, Key
 
-class QuestionType(models.TextChoices):
-    BINARY = 'SI_NO', 'Binario'
-    RANKING = 'RANKING', 'Ranking'
-    NORMAL = 'NORMAL', 'Normal'
 
 class Question(models.Model):
     desc = models.TextField()
+    TYPES = [
+        ('BINARY', 'Si_No'),
+        ('RANKING', 'Ranking'),
+        ('NORMAL', 'Normal'),
+        ('MULTIPLE', 'Multiple_choice')
+    ]
     type = models.CharField(
         max_length=10,
-        choices=QuestionType.choices,
-        default=QuestionType.NORMAL
+        choices=TYPES,
+        default='NORMAL'
     )
 
     def __str__(self):
@@ -28,7 +30,7 @@ class Question(models.Model):
         is_new = self._state.adding
         super().save(*args, **kwargs)
 
-        if self.type == QuestionType.BINARY:
+        if self.type == "BINARY":
             if not is_new:
                 self.options.all().delete()
             if not self.options.filter(option="Sí").exists():
@@ -37,9 +39,6 @@ class Question(models.Model):
                 QuestionOption.objects.create(question=self, option="No", number=2)
 
 
-        # Validacines del type
-        elif self.type == QuestionType.RANKING and self.options.count() < 3:
-            raise ValidationError('Las preguntas de tipo ranking deben tener al menos 3 opciones.')
 
 
 class QuestionOption(models.Model):
@@ -52,7 +51,7 @@ class QuestionOption(models.Model):
             self.number = self.question.options.count() + 2
 
         # Verifica si la pregunta es de tipo binario y evita crear opciones adicionales
-        if self.question.type != QuestionType.BINARY or not self.question.options.exists():
+        if self.question.type != "BINARY" or not self.question.options.exists():
             super().save(*args, **kwargs)
 
 
@@ -61,13 +60,14 @@ class QuestionOption(models.Model):
 
     def __str__(self):
         return '{} ({})'.format(self.option, self.number)
+    
+
 
 class Voting(models.Model):
     name = models.CharField(max_length=200)
     desc = models.TextField(blank=True, null=True)
     question = models.ForeignKey(Question, related_name='voting', on_delete=models.CASCADE)
 
-    ranked = models.BooleanField(default=False)
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
@@ -143,8 +143,10 @@ class Voting(models.Model):
 
         self.do_postproc()
 
+        
+
     def do_postproc(self):
-        ranked = self.ranked
+        ranked = self.question.type =='RANKING'
         tally = self.tally
         options = self.question.options.all()
 
