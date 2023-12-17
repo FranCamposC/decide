@@ -29,7 +29,8 @@ class QuestionForm(forms.ModelForm):
                 filled_forms += 1
         if question_type == "NORMAL" and int(filled_forms) < 2:
             raise forms.ValidationError('Las preguntas de tipo normal deben tener al menos 2 opciones.')
-
+        if question_type == "MULTIPLE" and int(filled_forms) < 2:
+            raise forms.ValidationError('Las preguntas de tipo multiple deben tener al menos 2 opciones.')
         if question_type == "RANKING" and int(filled_forms) < 3:
             raise forms.ValidationError('Las preguntas de tipo ranking deben tener al menos 3 opciones.')
 

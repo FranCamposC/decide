@@ -11,9 +11,10 @@ from base.models import Auth, Key
 class Question(models.Model):
     desc = models.TextField()
     TYPES = [
-        ('BINARY', 'Binario'),
+        ('BINARY', 'Si_No'),
         ('RANKING', 'Ranking'),
-        ('NORMAL', 'Normal')
+        ('NORMAL', 'Normal'),
+        ('MULTIPLE', 'Multiple_choice')
     ]
     type = models.CharField(
         max_length=10,
@@ -141,6 +142,8 @@ class Voting(models.Model):
         self.save()
 
         self.do_postproc()
+
+        
 
     def do_postproc(self):
         ranked = self.question.type =='RANKING'
