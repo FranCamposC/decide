@@ -42,8 +42,7 @@ class CensusTestCase(BaseTestCase):
         self.option2.save()
         self.voting = Voting.objects.create(
             name='Test Voting',
-            question=self.question,
-            ranked=False
+            question=self.question
         )
         self.voting.save()
         self.user1 = User.objects.create(
