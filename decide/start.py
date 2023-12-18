@@ -140,16 +140,8 @@ if __name__ == '__main__':
     time.sleep(1)
     url=input("¿Es esta la url en la que desea ejecutar la aplicación? "+local_url+" (si/no): ") 
     if url=="no":
-        local_url=input("Introduzca la url en la que desea ejecutar la aplicación: ")
-        print("Url cambiada a: "+local_url)
-        aviso=input("AVISO: Este cambio puede probocar problemas al ejecutar la aplicación. Lo hace bajo su responsabilidad. ¿Desea continuar con el proceso?(si/no): ")
-        if aviso=="no":
-            exit()
-        else:
-            print("Cambiando url en el archivo local_settings.py...")
-            time.sleep(2)
-            cambiar_url_local(local_url)
-            print("Url cambiada con exito")
+        print("Dirigete a tu archivo local_settings.py, cambiala, y vuelve a ejecutar el script")
+        exit()
     else:
         print("Url no cambiada")
     req=input("¿Desea instalar los requerimientos? (si/no): ")
