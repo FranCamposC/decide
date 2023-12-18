@@ -41,7 +41,11 @@ class CensusTestCase(StaticLiveServerTestCase):
         self.assertTrue(len(self.driver.find_elements(By.ID, 'voters-list'))==4)
         
     def test_export_census_csv(self):
-
+        self.driver.get(f'{self.live_server_url}/census/')
+       #Busca los elementos y “escribe”
+        self.driver.find_element(By.ID,'id_voting_id').send_keys("1")
+        self.driver.find_element(By.ID,'id_voters').send_keys("1,2,3,4",Keys.ENTER)
+    
         self.driver.get(f'{self.live_server_url}/census/export/1')
         self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, 'download')) > 0)
 
