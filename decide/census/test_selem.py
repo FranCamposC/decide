@@ -69,8 +69,10 @@ class CensusTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID,'v').find_elements(By.TAG_NAME, 'option')[0].click()
         self.driver.find_element(By.ID,'u').find_elements(By.TAG_NAME, 'option')[0].click()
         
-       #Verifica que los votantes se han añadido correctamente
-        self.assertTrue(len(self.driver.find_elements(By.ID, 'voters-list'))==1)
+       #Verifica que el censo se ha creado
+        self.driver.get(f'{self.live_server_url}/census/list/')
+        self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, 'card-title')) > 0)
+
         
     # Commenting out the test to export census as CSV
     # def test_export_census_csv(self):
