@@ -157,30 +157,41 @@ def VotingDeleteView(request,voting_id):
 @login_required
 @user_passes_test(staff_check)   
 def createQuestion(request):
+    types = ['BINARY','RANKING','NORMAL','MULTIPLE']
+
 
     if request.method == 'POST':
 
         numero= request.POST.get("number")
+        type= request.POST.get('type')
 
 
-
-        return redirect("/voting/question/create/"+ str(numero))
+        return redirect("/voting/question/create/"+ str(numero)+'?type='+type)
     return render(request, 'numberAnswer.html', {
-
+        'types': types
     })
 
 @login_required
 @user_passes_test(staff_check) 
 def auxCreateQuestion(request, numero):
-    numero_range = range(numero)
+    type=request.GET.get('type')
+    if type == 'BINARY':
+        numero_range = False
+    elif type == 'RANKING':
+        if numero < 3:
+            numero=3
+        numero_range = range(numero) 
+    else:
+        numero_range = range(numero)
     if request.method == 'POST':
         desc=request.POST.get("desc")
-        q=Question.objects.create(desc=desc)
+        q=Question.objects.create(desc=desc, type=type)
         Question.save(q)
-        for n in range(numero):
-            ans= request.POST.get("ans_"+ str(n))
-            respuesta= QuestionOption.objects.create(option=ans,question=q,number=n+1)   
-            QuestionOption.save(respuesta)
+        if not type == 'BINARY':
+            for n in range(numero):
+                ans= request.POST.get("ans_"+ str(n))
+                respuesta= QuestionOption.objects.create(option=ans,question=q,number=n+1)   
+                QuestionOption.save(respuesta)
 
         return redirect('/voting/question/list')
     return render(request, 'createQuestion.html', {  
