@@ -1,15 +1,25 @@
+from django.http import Http404
+from django.contrib.auth.decorators import login_required, user_passes_test
 import django_filters.rest_framework
 from django.conf import settings
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
+
+from django.shortcuts import get_object_or_404, redirect,render
+
 from rest_framework import generics, status
 from rest_framework.response import Response
+from django.views.generic.list import ListView
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 
 from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer
 from base.perms import UserIsStaff
 from base.models import Auth
 
+def staff_check(user):
+   admin = user.is_staff
+   return admin 
 
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
@@ -101,3 +111,166 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
             msg = 'Action not found, try with start, stop or tally'
             st = status.HTTP_400_BAD_REQUEST
         return Response(msg, status=st)
+    
+
+@login_required
+@user_passes_test(staff_check)
+def VotingListView(request):
+    templates_name= "listVotings.html"
+    votings = Voting.objects.all()
+    context = {
+        'votings': votings
+    }
+    return render(request, 'listVotings.html', context)
+
+
+
+@login_required
+@user_passes_test(staff_check)
+def ListQuestion(request):
+        census = Question.objects.all()
+        return render(request, 'listQuestion.html', {
+            'object_list':census
+        })
+
+    
+
+@login_required
+@user_passes_test(staff_check)  
+def QuestionDeleteView(request, question_id):
+    question = Question.objects.filter(pk=question_id).first()
+    Question.delete(question)
+
+    return redirect('/voting/question/list')
+
+
+@login_required
+@user_passes_test(staff_check)   
+def VotingDeleteView(request,voting_id):
+    voting = Voting.objects.filter(pk=voting_id).first()
+
+    Voting.delete(voting)
+
+    return redirect('/voting/list')
+
+@login_required
+@user_passes_test(staff_check)   
+def createQuestion(request):
+
+    if request.method == 'POST':
+
+        numero= request.POST.get("number")
+
+
+
+        return redirect("/voting/question/create/"+ str(numero))
+    return render(request, 'numberAnswer.html', {
+
+    })
+
+@login_required
+@user_passes_test(staff_check) 
+def auxCreateQuestion(request, numero):
+    numero_range = range(numero)
+    if request.method == 'POST':
+        desc=request.POST.get("desc")
+        q=Question.objects.create(desc=desc)
+        Question.save(q)
+        for n in range(numero):
+            ans= request.POST.get("ans_"+ str(n))
+            respuesta= QuestionOption.objects.create(option=ans,question=q,number=n+1)   
+            QuestionOption.save(respuesta)
+
+        return redirect('/voting/question/list')
+    return render(request, 'createQuestion.html', {  
+        "numero":numero_range
+    })
+
+@login_required
+@user_passes_test(staff_check)
+def VotingCreateView(request):
+    questions = Question.objects.all()
+
+    if request.method == 'POST':
+
+        name = request.POST.get('name')
+        desc = request.POST.get('desc')
+        question = request.POST.get('question')
+        question = Question.objects.get(pk=question)
+
+        voting = Voting(name=name, desc=desc, question=question)
+        voting.save()
+
+
+        return redirect('/voting/list' )
+    return render(request, 'createVoting.html', {
+        'questions': questions
+    })
+
+@login_required
+@user_passes_test(staff_check) 
+def VotingEditView(request, voting_id):
+    voting = Voting.objects.filter(pk=voting_id).first()
+    questions = Question.objects.all()
+
+    if request.method == 'POST':
+        # get data from the form
+        name = request.POST.get('name')
+        desc = request.POST.get('desc')
+        question = request.POST.get('question')
+
+        # update the product
+        if name != None and name != '':
+            voting.name = name
+        if desc != None and desc != '':
+            voting.desc = desc
+        if question != None and question != '':
+            question = Question.objects.get(pk=question)
+            voting.question = question
+
+        # save the product
+        voting.save()
+
+        # redirect to the same page after saving
+        return redirect('/voting/list')
+
+    return render(request, 'votingEdit.html', {
+        'voting': voting,
+        'questions': questions
+    })
+
+@login_required
+@user_passes_test(staff_check) 
+def editQuestion(request, question_id):
+    try:
+        question = Question.objects.get(pk=question_id)
+    except Question.DoesNotExist:
+        raise Http404("La pregunta no existe")
+    option=QuestionOption.objects.filter(question=question)
+    num_options = range(len(option))
+    if request.method == 'POST':
+        desc = request.POST.get("desc")
+        question.desc = desc
+        question.save()
+
+        num_options = len(QuestionOption.objects.filter(question=question))
+
+
+        for n in range(int(num_options)):
+            ans = request.POST.get("ans_" + str(n))
+            if ans: 
+                respuesta = QuestionOption.objects.get(question=question, number=n+1)
+                respuesta.option = ans
+                respuesta.save()
+
+        return redirect('/voting/question/list')
+
+    options = QuestionOption.objects.filter(question=question)
+    ls=[]
+    for o in options:
+        ls.append(o.option)
+    return render(request, 'questionEdit.html', {  
+        "question": question,
+        "options": ls,
+        "numero":num_options
+    })

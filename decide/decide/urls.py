@@ -27,7 +27,8 @@ urlpatterns = [
     path('doc/', schema_view),
     path('gateway/', include('gateway.urls')),
     path('',views.WelcomeView,name='home'),
-    path('user/',views.UserView,name='user')
+    path('user/',views.UserView,name='user'),
+    path('user/admin/',views.AdminView, name='admin')
 ]
 
 for module in settings.MODULES:
