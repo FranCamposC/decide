@@ -24,9 +24,12 @@ class CensusTestCase(StaticLiveServerTestCase):
 
         # Inicio de sesión como admin
         self.driver.get(f'{self.live_server_url}/admin/')
-        self.driver.find_element(By.NAME, 'username').send_keys('admin')
-        self.driver.find_element(By.NAME, 'password').send_keys('admin', Keys.ENTER)
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'user-tools')))
+        #Busca los elementos y “escribe”
+        self.driver.find_element(By.ID,'id_username').send_keys("admin")
+        self.driver.find_element(By.ID,'id_password').send_keys("qwerty",Keys.ENTER)
+        
+        #Verifica que nos hemos logado porque aparece la barra de herramientas superior
+        self.assertTrue(len(self.driver.find_elements(By.ID, 'user-tools'))==1)
 
         super().setUp()            
             
