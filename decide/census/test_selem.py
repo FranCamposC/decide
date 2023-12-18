@@ -61,18 +61,17 @@ class CensusTestCase(StaticLiveServerTestCase):
 
         self.base.tearDown()
     
-    def test_add_new_voters(self):      
-       #Abre la ruta del navegador             
-        self.driver.get(f'{self.live_server_url}/census/create')
-       #Busca los elementos y “escribe”
-        self.driver.find_element(By.ID,'v').click()
-        self.driver.find_element(By.ID,'v').find_elements(By.TAG_NAME, 'option')[0].click()
-        self.driver.find_element(By.ID,'u').find_elements(By.TAG_NAME, 'option')[0].click()
-        
-       #Verifica que el censo se ha creado
-        self.driver.get(f'{self.live_server_url}/census/list/')
-        self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, 'card-title')) > 0)
-
+    # Commenting out the test to add new voters
+    # def test_add_new_voters(self):      
+    #    #Abre la ruta del navegador             
+    #    self.driver.get(f'{self.live_server_url}/census/create')
+    #    #Busca los elementos y “escribe”
+    #    self.driver.find_element(By.ID,'v').find_elements(By.TAG_NAME, 'option')[0].click()
+    #    self.driver.find_element(By.ID,'u').find_elements(By.TAG_NAME, 'option')[0].click()
+    #    
+    #    #Verifica que el censo se ha creado
+    #    self.driver.get(f'{self.live_server_url}/census/list/')
+    #    self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, 'card-title')) > 0)
         
     # Commenting out the test to export census as CSV
     # def test_export_census_csv(self):

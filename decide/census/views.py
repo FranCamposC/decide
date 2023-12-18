@@ -140,7 +140,7 @@ def editCensus(request, voting_id):
     })
 
 class CensusExport(generics.RetrieveAPIView):
-    def retrieve(self, request, voting_id = None, *args, **kwargs):
+    def retrieve(self, request, voting_id, *args, **kwargs):
         try:
             import csv
             response = HttpResponse(content_type='text/csv')
@@ -149,7 +149,7 @@ class CensusExport(generics.RetrieveAPIView):
             writer = csv.writer(response)
             writer.writerow(['voting_id', 'voter_id'])
 
-            for census in Census.objects.all().values_list('voting_id', 'voter_id'):
+            for census in Census.objects.filter(voting_id=voting_id).values_list('voting_id', 'voter_id'):
                 writer.writerow(census)
         except Exception as e:
             return Response('Error processing request', status=ST_500)
