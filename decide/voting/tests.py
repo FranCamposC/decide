@@ -1,5 +1,7 @@
 import random
 import itertools
+from django.urls import reverse
+from django.forms import ValidationError
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -359,6 +361,21 @@ class QuestionsTests(StaticLiveServerTestCase):
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
+        self.question = Question.objects.create(desc='Test Question')
+        self.question.save()
+        self.option1 = QuestionOption.objects.create(
+            question=self.question,
+            number=1,
+            option='Option 1'
+        )
+        self.option1.save()
+        self.option2 = QuestionOption.objects.create(
+            question=self.question,
+            number=2,
+            option='Option 2'
+        )
+        self.option2.save()
+
         super().setUp()
 
     def tearDown(self):
@@ -366,6 +383,68 @@ class QuestionsTests(StaticLiveServerTestCase):
         self.driver.quit()
 
         self.base.tearDown()
+
+    def test_list_questions(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('questionList')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_question_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('questionList')
+        response = self.client.get(url)
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_create_question(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/question/create/3",{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2",'ans_2': "opcion3"})
+        question = Question.objects.filter(desc="descripcion").first()
+        self.assertIsNotNone(question)
+
+    def test_create_question_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/question/create/3",{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2",'ans_2': "opcion3"})
+        question = Question.objects.filter(desc="descripcion").first()
+        self.assertIsNone(question)
+    
+    def test_delete_question(self):
+        
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('delete', args=[self.question.id])
+        response = self.client.delete(url)
+        question = Question.objects.filter(pk=self.question.id).first()
+        self.assertIsNone(question)
+
+    def test_delete_unauthorised(self):
+
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('delete', args=[self.question.id])
+        response = self.client.delete(url)
+        question = Question.objects.filter(pk=self.question.id).first()
+        self.assertIsNotNone(question)
+
+    def test_edit_question(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/question/edit/"+str(self.question.id),{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2"})
+        question= Question.objects.filter(pk=self.question.id).first()
+        self.assertEqual(question.desc,"descripcion")
+
+    def test_edit_question_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/question/edit/"+str(self.question.id),{'desc': "descripcion", 'ans_0': "opcion1",'ans_1': "opcion2"})
+        question= Question.objects.filter(pk=self.question.id).first()
+        self.assertNotEqual(question.desc,"descripcion")
+
+
 
     def createQuestionSuccess(self):
         self.cleaner.get(self.live_server_url+"/admin/login/?next=/admin/")
@@ -413,3 +492,118 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
+
+class VotingTests(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        self.question = Question.objects.create(desc='Test Question')
+        self.question.save()
+        self.option1 = QuestionOption.objects.create(
+            question=self.question,
+            option='desc 1'
+        )
+        self.option1.save()
+        self.option2 = QuestionOption.objects.create(
+            question=self.question,
+            option='desc 2'
+        )
+        self.option2.save()
+        self.voting = Voting.objects.create(
+            name='Test Voting',
+            question=self.question,
+        )
+
+        self.voting.save()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_list_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('list')
+        response = self.client.get(url)
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_create_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post(reverse('votingCreate'),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting = Voting.objects.filter(name="nombre").first()
+        self.assertIsNotNone(voting)
+
+    def test_create_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post(reverse('votingCreate'),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting = Voting.objects.filter(name="nombre").first()
+        self.assertIsNone(voting)
+
+    def test_delete_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('votingDelete', args=[self.voting.id])
+        response = self.client.delete(url)
+        voting = Voting.objects.filter(pk=self.voting.id).first()
+        self.assertIsNone(voting)
+
+    def test_delete_voting_unauthorised(self):
+
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('votingDelete', args=[self.voting.id])
+        response = self.client.delete(url)
+        voting = Voting.objects.filter(pk=self.voting.id).first()
+        self.assertIsNotNone(voting)
+
+    def test_edit_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting= Voting.objects.filter(pk=self.voting.id).first()
+        self.assertEqual(voting.desc,"descripcion")
+
+    def test_edit_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting= Voting.objects.filter(pk=self.voting.id).first()
+        self.assertNotEqual(voting.desc,"descripcion")
+
+class QuestionModelTest(TestCase):
+
+    def setUp(self):
+        self.question = Question.objects.create(desc="Pregunta de prueba", type="NORMAL")
+
+    def test_question_creation(self):
+        self.assertEqual(self.question.desc, "Pregunta de prueba")
+        self.assertEqual(self.question.type, "NORMAL")
+
+    def test_binary_question_creation(self):
+        binary_question = Question.objects.create(desc="Pregunta binaria", type="BINARY")
+        self.assertTrue(binary_question.options.filter(option="Sí").exists())
+        self.assertTrue(binary_question.options.filter(option="No").exists())
+
+
+class QuestionOptionModelTest(TestCase):
+
+    def setUp(self):
+        self.question = Question.objects.create(desc="Pregunta de prueba", type="NORMAL")
+
+    def test_question_option_creation(self):
+        option = QuestionOption.objects.create(question=self.question, option="Opción 1")
+        self.assertEqual(option.option, "Opción 1")
+
+    def test_question_option_number_assignment(self):
+        option = QuestionOption.objects.create(question=self.question, option="Opción 2")
+        self.assertEqual(option.number, 2) 
+

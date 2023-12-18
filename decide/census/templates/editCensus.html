@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+    <link type="text/css" rel="stylesheet"
+         href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="{% static "booth/style.css" %}" />
+{% endblock %}
+{%block content%}
+<style>
+   .option-element {
+       margin-right: 1em;
+   }
+</style>
+
+<div id="app-booth">
+   <div id="admin-census">
+       <nav class="navbar navbar-dark bg-primary">
+           <div class="container-fluid">
+            <a class="navbar-brand" href="/">Decide</a>
+           </div>
+       </nav>
+   </div>
+   <br>
+   <h1 style="text-align:center">Editar el censo para la votación: {{voting.name}}</h1>
+    <form method="post">{% csrf_token %}
+        <div class="form-group" style="padding:25px; padding-bottom:0px;">
+            <h4>Usuarios:
+                <select id="u" name="u" class="form-control" multiple>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {% if user in selectedUsers %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </h4>
+        </div>
+        <div style="padding:25px; padding-bottom:0px;">
+            <button type="submit" class="btn btn-primary">Crear</button>
+        </div>
+    </form>
+{%endblock%}

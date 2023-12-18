@@ -1,42 +1,70 @@
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    <title>Bienvenido</title>
-<style>
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    
+    <hr>
+    <title>Decide: Tú eliges</title>
+    <style>
         body{
             height:100vh;
             margin:0;
             padding:0;
+            background-color: #87CEEB; 
         }
-        .fondo-degradado{
-            background: linear-gradient(to bottom right, #87CEEB,#FFFFFF);
-            height:100%;
+        .btn-custom {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #ffffff;
         }
-</style>
+    </style>
 
+</head>
 <body>
-    {%if user.is_authenticated%}
-<div class="container-fluid fondo-degradado">
-    <div class="col-md-6 mx-auto">
-    <h1 class="col-md-10 mx-auto">Bienvenido a Decide</h1>
-    <h2 class="col-md-10 mx-auto">¿Qué le apetece hacer?</h2>
-        <div class="col-md-7 mx-auto flex-column">
-                <button type="button" class="btn btn-lg btn-primary my-4" onclick="window.location.href='/user'">Ir a mi página principal</button>
-                <button type="button" class="btn btn-lg btn-primary my-4" onclick="window.location.href='/authentication/cerrarSesion'">Cerrar sesión</button>
-        </div>   
-</div>
-</div>
-{%endif%}
+    <br>
+    <br>
+    {% if user.is_authenticated %}
+    <div class="container-fluid">
+        <div class="col-md-6 mx-auto text-center">
+            <h1 class="col-md-10 mx-auto" style="text-decoration: underline;">Decide: Tú eliges</h1>
+            <br>
+            <hr>
+            <h2 class="col-md-10 mx-auto">¿Qué quieres hacer ahora?</h2>
+            <br>
+            <div class="col-md-7 mx-auto flex-column">
+                <button type="button" class="btn btn-custom btn-lg my-4" onclick="window.location.href='/user'">Explora tu perfil personal</button>
+                <button type="button" class="btn btn-custom btn-lg my-4" onclick="window.location.href='/authentication/cerrarSesion'">Cerrar sesión</button>
+            </div>   
+        </div>
+    </div>
+    {% endif %}
+    {% if not user.is_authenticated %}
+    <div class="container-fluid">
+        <div class="col-md-6 mx-auto text-center">
+            <h1 class="col-md-10 mx-auto">Bienvenido a Decide</h1>
+            <br>
+            <h2 class="col-md-10 mx-auto">¿Qué quieres hacer ahora?</h2>
+            <br>
+            <div class="col-md-7 mx-auto flex-column">
+                <button type="button" class="btn btn-custom btn-lg my-4" onclick="window.location.href='/authentication/registro'">Regístrate como nuevo usuario</button>
+                <br>
+                <button type="button" class="btn btn-custom btn-lg my-4" onclick="window.location.href='/authentication/admin'">Accede como administrador</button>
+                <br>
+                <button type="button" class="btn btn-custom btn-lg my-4" onclick="window.location.href='/authentication/logueo'">Iniciar sesión como usuario existente</button>
+            </div>   
+        </div>
+    </div>
+    {% endif %}
+    <br>
+    <hr>
+    <br>
     
-    <div class="container-fluid fondo-degradado">
-    <div class="col-md-6 mx-auto">
-    <h1 class="col-md-10 mx-auto">Bienvenido a Decide</h1>
-    <h2 class="col-md-10 mx-auto">¿Qué le apetece hacer?</h2>
-        <div class="col-md-7 mx-auto flex-column">
-                <button type="button" class="btn btn-lg btn-primary my-4" onclick="window.location.href='/authentication/registro'">Soy un nuevo usuario</button>
-                <button type="button" class="btn btn-lg btn-primary my-4" onclick="window.location.href='/admin'">Soy un administrador</button>
-                <button type="button" class="btn btn-lg btn-primary my-4" onclick="window.location.href='/authentication/logueo'">Ya soy un usuario </button>
-        </div>   
-</div>
-</div>
-
+    <p style="text-align: center;">
+        <a style="color:blue">
+            Términos y condiciones
+        </a> |
+        <a style="color:blue">
+            Políticas de la empresa
+        </a>
+    </p>
 </body>
 </html>
