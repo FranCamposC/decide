@@ -23,11 +23,11 @@ class CensusTestCase(StaticLiveServerTestCase):
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
-        User.objects.create_superuser('admin', 'admin@example.com', 'qwerty')
+        User.objects.create_superuser('admin_census', 'admin@example.com', 'qwerty')
         # Inicio de sesión como admin
         self.driver.get(f'{self.live_server_url}/admin/')
         #Busca los elementos y “escribe”
-        self.driver.find_element(By.ID,'id_username').send_keys("admin")
+        self.driver.find_element(By.ID,'id_username').send_keys("admin_census")
         self.driver.find_element(By.ID,'id_password').send_keys("qwerty",Keys.ENTER)
         
         #Verifica que nos hemos logado porque aparece la barra de herramientas superior
