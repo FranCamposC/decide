@@ -22,6 +22,12 @@ class CensusTestCase(StaticLiveServerTestCase):
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
+        # Inicio de sesión como admin
+        self.driver.get(f'{self.live_server_url}/admin/')
+        self.driver.find_element(By.NAME, 'username').send_keys('admin')
+        self.driver.find_element(By.NAME, 'password').send_keys('admin', Keys.ENTER)
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'user-tools')))
+
         super().setUp()            
             
     def tearDown(self):           
