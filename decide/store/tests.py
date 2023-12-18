@@ -193,3 +193,41 @@ class StoreTextCase(BaseTestCase):
         self.voting.save()
         response = self.client.post('/store/', data, format='json')
         self.assertEqual(response.status_code, 401)
+
+    def test_store_multiple_votes(self):
+        # Configuración inicial
+        VOTING_PK = 345  # Asegúrate de usar un ID de votación válido
+        USER_ID = 1      # Asegúrate de usar un ID de usuario válido
+        self.gen_voting(VOTING_PK)
+        census = Census(voting_id=VOTING_PK, voter_id=USER_ID)
+        census.save()
+        user = self.get_or_create_user(USER_ID)
+        self.login(user=user.username)
+
+        # Datos de votación múltiple
+        votes_data = [
+            {"a": 10, "b": 20},
+            {"a": 30, "b": 40},
+            {"a": 50, "b": 60}
+        ]
+        data = {
+            "voting": VOTING_PK,
+            "voter": USER_ID,
+            "vote": votes_data
+        }
+
+        # Enviar la solicitud POST con múltiples votos
+        response = self.client.post('/store/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        # Verificar que todos los votos se almacenaron correctamente
+        for vote in votes_data:
+            self.assertTrue(Vote.objects.filter(
+                voting_id=VOTING_PK, 
+                voter_id=USER_ID, 
+                a=vote["a"], 
+                b=vote["b"]
+            ).exists())
+
+        # Verificar el número total de votos almacenados
+        self.assertEqual(Vote.objects.filter(voting_id=VOTING_PK, voter_id=USER_ID).count(), len(votes_data))
