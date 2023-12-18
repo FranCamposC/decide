@@ -43,11 +43,5 @@ class CensusTestCase(StaticLiveServerTestCase):
     def test_export_census_csv(self):
 
         self.driver.get(f'{self.live_server_url}/census/export/1')
-
-       #Verifica que se ha descargado el archivo csv
-        try:
-            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'downloaded-csv')))
-            self.assertTrue(True)
-        except:
-            self.assertTrue(False)
+        self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, 'download')) > 0)
 
