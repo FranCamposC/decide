@@ -513,7 +513,6 @@ class VotingTests(BaseTestCase):
         self.voting = Voting.objects.create(
             name='Test Voting',
             question=self.question,
-            ranked=False
         )
 
         self.voting.save()
