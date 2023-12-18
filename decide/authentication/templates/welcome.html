@@ -31,7 +31,7 @@
             <h2 class="col-md-10 mx-auto">¿Qué quieres hacer ahora?</h2>
             <br>
             <div class="col-md-7 mx-auto flex-column">
-                <button type="button" class="btn btn-custom btn-lg my-4" onclick="window.location.href='/user'">Explora tu perfil personal</button>
+                <button type="button" class="btn btn-custom btn-lg my-4" onclick="window.location.href='{%if not user.is_staff%} /user {%else%} /user/admin {%endif%}'">Explora tu perfil personal</button>
                 <button type="button" class="btn btn-custom btn-lg my-4" onclick="window.location.href='/authentication/cerrarSesion'">Cerrar sesión</button>
             </div>   
         </div>
