@@ -73,3 +73,28 @@ class AdminTestCase(StaticLiveServerTestCase):
         self.assertTrue(len(self.driver.find_elements(By.ID,'votaciones'))==1)
 
         time.sleep(5)
+    
+    def test_registerAndLoginAndLogout(self):
+            
+            self.driver.get(f'{self.live_server_url}/authentication/registro/')
+            self.driver.find_element(By.ID,'id_username').send_keys("usuario")
+            self.driver.find_element(By.ID,'id_password1').send_keys("estacontraseñaesvalida",Keys.ENTER)
+            self.driver.find_element(By.ID,'id_password2').send_keys("estacontraseñaesvalida",Keys.ENTER)
+            self.driver.get(f'{self.live_server_url}/authentication/logueo/')
+            self.driver.find_element(By.ID,'id_username').send_keys("usuario")
+            self.driver.find_element(By.ID,'id_password').send_keys("estacontraseñaesvalida",Keys.ENTER)
+            self.driver.find_element(By.ID,'logout').click()
+    
+            self.assertTrue(len(self.driver.find_elements(By.ID,'newUser'))==1)
+    
+            time.sleep(5)
+    def test_registerBadPassword(self):
+             
+            self.driver.get(f'{self.live_server_url}/authentication/registro/')
+            self.driver.find_element(By.ID,'id_username').send_keys("usuario")
+            self.driver.find_element(By.ID,'id_password1').send_keys("estacontraseñaesvalida",Keys.ENTER)
+            self.driver.find_element(By.ID,'id_password2').send_keys("estacontraseñaesvalida2",Keys.ENTER)
+            
+            self.assertTrue(len(self.driver.find_elements(By.ID,'stillRegister'))==1)
+    
+            time.sleep(5)
