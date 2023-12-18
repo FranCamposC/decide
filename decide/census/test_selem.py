@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from django.contrib.auth.models import User
 
 class CensusTestCase(StaticLiveServerTestCase):
 
@@ -22,6 +23,7 @@ class CensusTestCase(StaticLiveServerTestCase):
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
+        User.objects.create_superuser('admin', 'admin@example.com', 'qwerty')
         # Inicio de sesión como admin
         self.driver.get(f'{self.live_server_url}/admin/')
         #Busca los elementos y “escribe”
