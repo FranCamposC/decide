@@ -1,6 +1,7 @@
 import random
 import itertools
 from django.urls import reverse
+from django.forms import ValidationError
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -578,3 +579,32 @@ class VotingTests(BaseTestCase):
         response = self.client.post("/voting/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
         voting= Voting.objects.filter(pk=self.voting.id).first()
         self.assertNotEqual(voting.desc,"descripcion")
+
+class QuestionModelTest(TestCase):
+
+    def setUp(self):
+        self.question = Question.objects.create(desc="Pregunta de prueba", type="NORMAL")
+
+    def test_question_creation(self):
+        self.assertEqual(self.question.desc, "Pregunta de prueba")
+        self.assertEqual(self.question.type, "NORMAL")
+
+    def test_binary_question_creation(self):
+        binary_question = Question.objects.create(desc="Pregunta binaria", type="BINARY")
+        self.assertTrue(binary_question.options.filter(option="Sí").exists())
+        self.assertTrue(binary_question.options.filter(option="No").exists())
+
+
+class QuestionOptionModelTest(TestCase):
+
+    def setUp(self):
+        self.question = Question.objects.create(desc="Pregunta de prueba", type="NORMAL")
+
+    def test_question_option_creation(self):
+        option = QuestionOption.objects.create(question=self.question, option="Opción 1")
+        self.assertEqual(option.option, "Opción 1")
+
+    def test_question_option_number_assignment(self):
+        option = QuestionOption.objects.create(question=self.question, option="Opción 2")
+        self.assertEqual(option.number, 2) 
+
