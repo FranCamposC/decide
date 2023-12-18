@@ -327,7 +327,7 @@ class CensusExportTestCase(BaseTestCase):
         csv_reader = csv.reader(io.StringIO(content))
         body = list(csv_reader)
         self.assertEqual(body[0], ['voting_id', 'voter_id'])
-        self.assertEqual(body[1], [], "The body should be empty")
+        self.assertEqual(len(body), 1, "The body should be empty")
     def test_export_census_csv_invalid_voting_id(self):
         response = self.client.get('/census/export/abc')
         self.assertEqual(response.status_code, 404)
