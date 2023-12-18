@@ -22,7 +22,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption, VotingOption
+from voting.models import Voting, Question, QuestionOption
 from datetime import datetime
 
 class VotingModelTestCase(BaseTestCase):
