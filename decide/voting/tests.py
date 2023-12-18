@@ -22,7 +22,7 @@ from census.models import Census
 from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
+from voting.models import Voting, Question, QuestionOption, VotingOption
 from datetime import datetime
 
 class VotingModelTestCase(BaseTestCase):
@@ -493,6 +493,92 @@ class QuestionsTests(StaticLiveServerTestCase):
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
 
+class VotingTests(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        self.question = Question.objects.create(desc='Test Question')
+        self.question.save()
+        self.option1 = QuestionOption.objects.create(
+            question=self.question,
+            option='desc 1'
+        )
+        self.option1.save()
+        self.option2 = QuestionOption.objects.create(
+            question=self.question,
+            option='desc 2'
+        )
+        self.option2.save()
+        self.voting = Voting.objects.create(
+            name='Test Voting',
+            question=self.question,
+            ranked=False
+        )
+
+        self.voting.save()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_list_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('list')
+        response = self.client.get(url)
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_create_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post(reverse('votingCreate'),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting = Voting.objects.filter(name="nombre").first()
+        self.assertIsNotNone(voting)
+
+    def test_create_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post(reverse('votingCreate'),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting = Voting.objects.filter(name="nombre").first()
+        self.assertIsNone(voting)
+
+    def test_delete_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        url = reverse('votingDelete', args=[self.voting.id])
+        response = self.client.delete(url)
+        voting = Voting.objects.filter(pk=self.voting.id).first()
+        self.assertIsNone(voting)
+
+    def test_delete_voting_unauthorised(self):
+
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        url = reverse('votingDelete', args=[self.voting.id])
+        response = self.client.delete(url)
+        voting = Voting.objects.filter(pk=self.voting.id).first()
+        self.assertIsNotNone(voting)
+
+    def test_edit_voting(self):
+        user = User.objects.get(username='admin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting= Voting.objects.filter(pk=self.voting.id).first()
+        self.assertEqual(voting.desc,"descripcion")
+
+    def test_edit_voting_unauthorised(self):
+        user = User.objects.get(username='noadmin')
+        self.client.force_login(user)
+        response = self.client.post("/voting/edit/"+str(self.voting.id),{'name': "nombre", 'desc': "descripcion", 'question': self.question.id})
+        voting= Voting.objects.filter(pk=self.voting.id).first()
+        self.assertNotEqual(voting.desc,"descripcion")
 
 class QuestionModelTest(TestCase):
 
