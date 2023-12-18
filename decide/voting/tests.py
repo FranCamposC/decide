@@ -1,6 +1,7 @@
 import random
 import itertools
 from django.urls import reverse
+from django.forms import ValidationError
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -491,4 +492,33 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
+
+
+class QuestionModelTest(TestCase):
+
+    def setUp(self):
+        self.question = Question.objects.create(desc="Pregunta de prueba", type="NORMAL")
+
+    def test_question_creation(self):
+        self.assertEqual(self.question.desc, "Pregunta de prueba")
+        self.assertEqual(self.question.type, "NORMAL")
+
+    def test_binary_question_creation(self):
+        binary_question = Question.objects.create(desc="Pregunta binaria", type="BINARY")
+        self.assertTrue(binary_question.options.filter(option="Sí").exists())
+        self.assertTrue(binary_question.options.filter(option="No").exists())
+
+
+class QuestionOptionModelTest(TestCase):
+
+    def setUp(self):
+        self.question = Question.objects.create(desc="Pregunta de prueba", type="NORMAL")
+
+    def test_question_option_creation(self):
+        option = QuestionOption.objects.create(question=self.question, option="Opción 1")
+        self.assertEqual(option.option, "Opción 1")
+
+    def test_question_option_number_assignment(self):
+        option = QuestionOption.objects.create(question=self.question, option="Opción 2")
+        self.assertEqual(option.number, 2) 
 
