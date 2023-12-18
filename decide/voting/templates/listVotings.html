@@ -36,11 +36,31 @@
                 <div class="card">
 
                    <div class="card-body">
-                       <h4 class="card-title">{{object.name}}</h4>
+                       <h4 class="card-title">{{object.name}} 
+                            <a style="font-size: medium;">
+                                Estado:
+                            </a>
+                            <a style="text-align: center; margin-top: 20px; font-size: medium; color: 
+                                {% if object.estado == 'Sin empezar' %}#FF0000
+                                {% elif object.estado == 'Empezada' %}#E5BE01
+                                {% elif object.estado == 'Finalizada' %}#008F39
+                                {% elif object.estado == 'Recontada' %}#0000FF
+                                {% endif %};">
+                                {{object.estado}}
+                       </a>
+                       </h4>
                        <hr>
                        <div class="d-flex flex-column">
                            <a href="/voting/edit/{{object.pk}}" class="btn btn-primary">Editar</a>
                            <a href="/voting/delete/{{object.pk}}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar esta votacion?');">Eliminar</a>
+                           {% if not object.estado == 'Recontada' %}
+                            <a href="/voting/process/{{object.pk}}" class="btn btn-warning">
+                                {% if object.estado == 'Sin empezar' %}Empezar
+                                {% elif object.estado == 'Empezada' %}Finalizar
+                                {% elif object.estado == 'Finalizada' %}Recontar
+                                {% endif %}
+                            </a>
+                           {% endif %}
                        </div>
                    </div>
                 </div>
