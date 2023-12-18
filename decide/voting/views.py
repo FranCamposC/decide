@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Permission, User
 from django.http import Http404
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django_filters.rest_framework
@@ -197,9 +198,12 @@ def VotingCreateView(request):
         desc = request.POST.get('desc')
         question = request.POST.get('question')
         question = Question.objects.get(pk=question)
-
+        auths = Auth.objects.all()
         voting = Voting(name=name, desc=desc, question=question)
         voting.save()
+        for a in auths:
+            voting.auths.add(a)
+            voting.save()
 
 
         return redirect('/voting/list' )
@@ -274,3 +278,20 @@ def editQuestion(request, question_id):
         "options": ls,
         "numero":num_options
     })
+
+@login_required
+@user_passes_test(staff_check)
+def votingProcess(request, voting_id):
+    voting = Voting.objects.filter(pk=voting_id).first()
+    if voting.estado() == 'Sin empezar':
+            voting.start_date = timezone.now()
+            voting.save()
+            voting.create_pubkey()
+
+    elif voting.estado() == 'Empezada':
+        voting.end_date = timezone.now()
+        voting.save()
+    elif voting.estado() == 'Finalizada':
+        token = request.session.get('auth-token', '')
+        voting.tally_votes(token)
+    return redirect('/voting/list')
