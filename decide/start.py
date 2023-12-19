@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
         for _ in range(50):
             user= User.objects.create_user(username=fake.user_name(), email=fake.email(),password="1234")
-            print(f"Usuario creado: {user.username}")
+            print(f"Usuario creado: {user.username} con id {user.id}")
         ad=input("¿Desea crear un administrador? (si/no):" )
         if ad=="si":
             nombre=input("Introduzca el nombre del usuario administrador: ")
@@ -193,12 +193,13 @@ if __name__ == '__main__':
             pass
         print("Usuarios creados con exito",end="\n\n")
         time.sleep(2)
-        print("Creando preguntas...")
+        print("Creando preguntas normales,ranking y opciones...")
         time.sleep(2)
 
         for pregunta in preguntas_predefinidas:
-                q=Question.objects.create(desc=pregunta["question_desc"])
-                print(f"Pregunta creada: {q.desc}")
+                q=Question.objects.create(desc=pregunta["question_desc"],
+                                          type=random.choice(["NORMAL","RANKING","MULTIPLE"]))
+                print(f"Pregunta de tipo {q.type} creada: {q.desc}")
                 for o in pregunta["opciones"]:
                     option = QuestionOption.objects.create(
                     question=q,
@@ -219,7 +220,6 @@ if __name__ == '__main__':
             voting_instance = Voting.objects.create(
                 name=nombre_votacion,
                 question=random.choice(preguntas),
-                ranked=random.choice([True, False]),
             )
             voting_instance.auths.add(authentication)
             print(f"Votacion creada: {voting_instance.name}")
