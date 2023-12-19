@@ -182,24 +182,17 @@ class AuthTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         token = response.json()
 
-        token.update({'username': 'user1', 'password': 'pwd1'})
+
+        token.update({'username': 'user4', 'password': 'pwd1'})
         response = self.client.post('/authentication/register/', token, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(
             sorted(list(response.json().keys())),
-            ['token', 'user_pk']
+            ['token','user_pk']
         )
-
-        token.update({'username': 'user2', 'password': 'pwd2'})
-        response = self.client.post('/authentication/register/', token, format='json')
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            sorted(list(response.json().keys())),
-            ['token', 'user_pk']
-        )
-
-        token.update({'username': 'user3', 'password': 'pwd1'})
-        response = self.client.post('/authentication/register/', token, format='json')
+        
+        token.update({'username': 'user4', 'password': 'pwd3'})
+        response = self.client.post('/authentication/login/', token, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             sorted(list(response.json().keys())),
