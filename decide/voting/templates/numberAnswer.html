@@ -26,7 +26,15 @@
    <br>
    <form class="center-form" method="post">
     {% csrf_token %}
-  
+    <h3>¿De que tipo es la pregunta que quieres realizar?</h3>
+    <div class="form-group" style="padding-bottom: 25px;">
+        <select id="type" name="type" class="form-control">
+            {% for t in types %}
+                <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <br>
     <h3>¿Cuantas respuestas quieres que tenga tu pregunta?</h3>
   
     <div class="input-container">

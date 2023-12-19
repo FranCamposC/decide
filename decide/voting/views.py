@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Permission, User
 from django.http import Http404
 from django.contrib.auth.decorators import login_required, user_passes_test
 import django_filters.rest_framework
@@ -156,30 +157,41 @@ def VotingDeleteView(request,voting_id):
 @login_required
 @user_passes_test(staff_check)   
 def createQuestion(request):
+    types = ['BINARY','RANKING','NORMAL','MULTIPLE']
+
 
     if request.method == 'POST':
 
         numero= request.POST.get("number")
+        type= request.POST.get('type')
 
 
-
-        return redirect("/voting/question/create/"+ str(numero))
+        return redirect("/voting/question/create/"+ str(numero)+'?type='+type)
     return render(request, 'numberAnswer.html', {
-
+        'types': types
     })
 
 @login_required
 @user_passes_test(staff_check) 
 def auxCreateQuestion(request, numero):
-    numero_range = range(numero)
+    type=request.GET.get('type')
+    if type == 'BINARY':
+        numero_range = False
+    elif type == 'RANKING':
+        if numero < 3:
+            numero=3
+        numero_range = range(numero) 
+    else:
+        numero_range = range(numero)
     if request.method == 'POST':
         desc=request.POST.get("desc")
-        q=Question.objects.create(desc=desc)
+        q=Question.objects.create(desc=desc, type=type)
         Question.save(q)
-        for n in range(numero):
-            ans= request.POST.get("ans_"+ str(n))
-            respuesta= QuestionOption.objects.create(option=ans,question=q,number=n+1)   
-            QuestionOption.save(respuesta)
+        if not type == 'BINARY':
+            for n in range(numero):
+                ans= request.POST.get("ans_"+ str(n))
+                respuesta= QuestionOption.objects.create(option=ans,question=q,number=n+1)   
+                QuestionOption.save(respuesta)
 
         return redirect('/voting/question/list')
     return render(request, 'createQuestion.html', {  
@@ -197,9 +209,12 @@ def VotingCreateView(request):
         desc = request.POST.get('desc')
         question = request.POST.get('question')
         question = Question.objects.get(pk=question)
-
+        auths = Auth.objects.all()
         voting = Voting(name=name, desc=desc, question=question)
         voting.save()
+        for a in auths:
+            voting.auths.add(a)
+            voting.save()
 
 
         return redirect('/voting/list' )
@@ -274,3 +289,20 @@ def editQuestion(request, question_id):
         "options": ls,
         "numero":num_options
     })
+
+@login_required
+@user_passes_test(staff_check)
+def votingProcess(request, voting_id):
+    voting = Voting.objects.filter(pk=voting_id).first()
+    if voting.estado() == 'Sin empezar':
+            voting.start_date = timezone.now()
+            voting.save()
+            voting.create_pubkey()
+
+    elif voting.estado() == 'Empezada':
+        voting.end_date = timezone.now()
+        voting.save()
+    elif voting.estado() == 'Finalizada':
+        token = request.session.get('auth-token', '')
+        voting.tally_votes(token)
+    return redirect('/voting/list')

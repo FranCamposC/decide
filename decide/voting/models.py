@@ -79,6 +79,18 @@ class Voting(models.Model):
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
 
+    def estado(self):
+        res = 'Sin empezar'
+        if self.start_date:
+            if self.end_date:
+                if self.tally:
+                    res = 'Recontada'
+                else:
+                    res = 'Finalizada'
+            else:
+                res = 'Empezada'
+        return res
+
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():
             return
