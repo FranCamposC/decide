@@ -1,9 +1,11 @@
 from django.contrib import admin
+from django.forms import inlineformset_factory
 from django.utils import timezone
 
 from .models import QuestionOption
 from .models import Question
 from .models import Voting
+from .form import QuestionForm, QuestionOptionForm
 
 from .filters import StartedFilter
 
@@ -26,12 +28,15 @@ def tally(ModelAdmin, request, queryset):
         token = request.session.get('auth-token', '')
         v.tally_votes(token)
 
+QuestionOptionFormset = inlineformset_factory(Question, QuestionOption, form=QuestionOptionForm, extra=1)
+
 
 class QuestionOptionInline(admin.TabularInline):
     model = QuestionOption
-
+    formset = QuestionOptionFormset
 
 class QuestionAdmin(admin.ModelAdmin):
+    form = QuestionForm
     inlines = [QuestionOptionInline]
 
 

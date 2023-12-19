@@ -91,6 +91,9 @@ def UserView(request):
     votaciones_usuario=Voting.objects.filter(id__in=id_votaciones)
     return render(request,'userView.html',{'votaciones':votaciones_usuario,'usuario':request.user})
 
+def AdminView(request):
+    return render(request,'adminView.html')
+
 def Register(request):
     if request.method == 'GET':
         return render(request,'register.html',{
@@ -102,8 +105,7 @@ def Register(request):
                 usuario=User.objects.create_user(username=request.POST['username'],     
                                     password=request.POST['password1'])
                 usuario.save()
-                login(request,usuario)
-                return redirect('user')
+                return redirect('/authentication/logueo')
             except:
                 return render(request,'register.html',{
                 'form': UserCreationForm,
@@ -124,7 +126,8 @@ def cerrarSesion(request):
 def Login(request):
     if request.method=='GET':
         return render(request,'login.html',{
-            'form':AuthenticationForm
+            'form':AuthenticationForm,
+            'admin':False
         })
     else:
         usuario=authenticate(
@@ -133,9 +136,29 @@ def Login(request):
         if usuario is None:
             return render(request,'login.html',{
                 'form':AuthenticationForm,
-                'error':'Usuario o contraseña incorrectos'
+                'error':'Usuario o contraseña incorrectos',
+                'admin':False
             })
         else:
             login(request,usuario)
             return redirect('user')
-
+          
+def LoginAdmin(request):
+    if request.method=='GET':
+        return render(request,'login.html',{
+            'form':AuthenticationForm,
+            'admin':True
+        })
+    if request.method=='POST':
+        usuario=authenticate(
+            request,username=request.POST['username'], password=request.POST
+            ['password'])
+        if usuario is None or not usuario.is_staff:
+            return render(request,'login.html',{
+                'form':AuthenticationForm,
+                'error':'Usuario o contraseña incorrectos',
+                'admin':True
+            })
+        else:
+            login(request,usuario)
+            return redirect('/user/admin') 

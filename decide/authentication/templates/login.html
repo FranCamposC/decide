@@ -1,14 +1,27 @@
 {%extends 'navbar.html'%}
 {%block content%}
 <body class="container">
-<form action ="/authentication/logueo/" method="POST" class="card card-body text center" >
-    <h1>Iniciar Sesión</h1>
-    {% csrf_token %}
-    {{error}}
-    {{form.as_p}}
-    <button class="btn btn-primary">
-        Iniciar Sesión
-    </button>
-</form>
+    {% if not admin %}
+        <form action ="/authentication/logueo/" method="POST" class="card card-body text center" >
+            <h1>Iniciar Sesión</h1>
+            {% csrf_token %}
+            {{error}}
+            {{form.as_p}}
+            <button class="btn btn-primary">
+                Iniciar Sesión
+            </button>
+        </form>
+    {% endif %}
+    {% if admin %}
+    <form action ="/authentication/admin/" method="POST" class="card card-body text center" >
+        <h1>Iniciar Sesión</h1>
+        {% csrf_token %}
+        {{error}}
+        {{form.as_p}}
+        <button class="btn btn-primary">
+            Iniciar Sesión
+        </button>
+    </form>
+{% endif %}
 </body>
 {%endblock%}
