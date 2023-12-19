@@ -1,4 +1,4 @@
-Django==4.1
+Django
 pycryptodome==3.15.0
 djangorestframework==3.14.0
 django-cors-headers==3.13.0
@@ -10,6 +10,10 @@ jsonnet==0.18.0
 django-nose==1.4.6
 django-rest-swagger==2.2.0
 selenium==4.7.2
-pynose==1.4.8
-gunicorn
-social-auth-app-django
+dj-database-url == 2.1.0
+pynose == 1.4.8
+whitenoise==6.5.0
+gunicorn==21.2.0
+social-auth-app-django==5.0.0
+django-extensions
+Werkzeug

@@ -65,6 +65,23 @@ class RegisterView(APIView):
             return Response({}, status=HTTP_400_BAD_REQUEST)
         return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
 
+class LoginForm(APIView):
+    def post(self, request):
+        username = request.data.get('username', '')
+        password = request.data.get('password', '')
+        if not username or not password:
+            return Response({}, status=HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return Response({'message': 'Authenticated successfully'}, status=HTTP_201_CREATED)
+            else:
+                return Response({'message': 'Disabled account'}, status=HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'message': 'Invalid login'}, status=HTTP_401_UNAUTHORIZED)
+          
 def WelcomeView(request):
     return render(request,'welcome.html')
 
@@ -125,7 +142,7 @@ def Login(request):
         else:
             login(request,usuario)
             return redirect('user')
-        
+          
 def LoginAdmin(request):
     if request.method=='GET':
         return render(request,'login.html',{
