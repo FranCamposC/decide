@@ -25,7 +25,6 @@ sentry_sdk.init(
     profiles_sample_rate=1.0,
 )
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,7 +36,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '^##ydkswfu0+=ofw0l#$kv^8n)0$i(qd&d&ol#p9!b$8*5%j1+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+ADMINS = [('aya', 'mariamarquezsierra2@gmail.com')]
 
 ALLOWED_HOSTS = []
 
@@ -127,7 +127,7 @@ WSGI_APPLICATION = 'decide.wsgi.application'
 
 
 
-# social auth configs for github
+# social auth configs
 SOCIAL_AUTH_GITHUB_KEY = '76bc2c2dd2a407d67898'
 SOCIAL_AUTH_GITHUB_SECRET = '4eb3fcbf76b690b66aaf4fff8c6b86d88452d08e'
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '91342751811-ipek1l1irdmg6e4f2apjqfunq7rg4q9s.apps.googleusercontent.com' # Google Client ID 
