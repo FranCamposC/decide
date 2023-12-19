@@ -1,3 +1,5 @@
+from http.client import HTTPResponse
+from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.shortcuts import render,redirect
 from django.db.utils import IntegrityError
@@ -9,11 +11,12 @@ from .models import Census
 from rest_framework.response import Response
 from django.views.generic.list import ListView
 from rest_framework.status import (
-        HTTP_201_CREATED as ST_201,
-        HTTP_204_NO_CONTENT as ST_204,
-        HTTP_400_BAD_REQUEST as ST_400,
-        HTTP_401_UNAUTHORIZED as ST_401,
-        HTTP_409_CONFLICT as ST_409
+    HTTP_201_CREATED as ST_201,
+    HTTP_204_NO_CONTENT as ST_204,
+    HTTP_400_BAD_REQUEST as ST_400,
+    HTTP_401_UNAUTHORIZED as ST_401,
+    HTTP_409_CONFLICT as ST_409,
+    HTTP_500_INTERNAL_SERVER_ERROR as ST_500
 )
 
 from base.perms import UserIsStaff
@@ -57,8 +60,8 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
         return Response('Valid voter')
 
 def staff_check(user):
-   admin = user.is_staff
-   return admin 
+    admin = user.is_staff
+    return admin 
 
 @login_required
 @user_passes_test(staff_check)
@@ -135,3 +138,19 @@ def editCensus(request, voting_id):
         'users': users,
         'selectedUsers': selectedUsers
     })
+
+class CensusExport(generics.RetrieveAPIView):
+    def retrieve(self, request, voting_id, *args, **kwargs):
+        try:
+            import csv
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="census.csv"'
+
+            writer = csv.writer(response)
+            writer.writerow(['voting_id', 'voter_id'])
+
+            for census in Census.objects.filter(voting_id=voting_id).values_list('voting_id', 'voter_id'):
+                writer.writerow(census)
+        except Exception as e:
+            return Response('Error processing request', status=ST_500)
+        return response
