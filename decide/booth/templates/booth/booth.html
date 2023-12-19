@@ -10,6 +10,12 @@
 
 {% block content %}
 
+<style>
+    .option-element {
+        margin-right: 1em;
+    }
+</style>
+
 <div id="app-booth">
     <!-- Navbar -->
     <nav class="navbar navbar-dark bg-primary">
@@ -118,15 +124,31 @@
         <div v-if="!signup">
             <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
             <h2>[[ voting.question.desc ]]</h2>
-            <form v-for="opt in voting.question.options" :key="opt.number">
-                <div class="form-group">
-                    <input type="radio" v-model="selected"
-                                :id="'q' + opt.number"
-                                name="question"
-                                :value="opt.number">
-                        [[ opt.option ]]
-                </div>
-            </form>
+            <div v-if="ranked">
+                <form v-for="opt in voting.question.options" :key="opt.number">
+                    <div class="form-group">
+                        <span class="option-element">[[ opt.option ]]:</span>
+                        <input type="number"
+                                    min="1" 
+                                    max="3"
+                                    :id="'q' + opt.number"
+                                    name="question"
+                                    v-model="selected[opt.number]"
+                                    :style="{ width: 50 + 'px' }">
+                        </div>
+                </form>
+            </div>
+            <div v-else>
+                <form v-for="opt in voting.question.options" :key="opt.number">
+                    <div class="form-group">
+                        <input type="radio" v-model="selected"
+                                    :id="'q' + opt.number"
+                                    name="question"
+                                    :value="opt.number">
+                            [[ opt.option ]]
+                    </div>
+                </form>
+            </div>
             <button class="btn btn-primary mt-3" v-on:click="decideSend">
                 {% trans "Vote" %}
             </button>
@@ -163,7 +185,8 @@
             data() {
                 return {
                     voting: voting,
-                    selected: "",
+                    ranked: voting.ranked,
+                    selected: this.initSelected(),
                     signup: true,
                     successVote: false,
                     alertShow: false,
@@ -198,7 +221,38 @@
                         }
                     });
                 },
-                postData(url, data) {
+                initSelected() {
+                    var options = voting.question.options;
+                    var numbers = [];
+                    var list = [];
+                    list.push(4)
+                    for (let option in options) {
+                        numbers.push(options[option].number);
+                    }
+                    let max = numbers[0];
+                    for(let i = 1; i < numbers.length; i++) {
+                        if(numbers[i] > max) {
+                            max = numbers[i];
+                        }
+                    }
+                    for(let i = 1; i <= max; i++) {
+                        list.push(0);
+                    }
+                    return list;
+                },
+                parseSelected() {
+                    var fixedSelected = [];
+                    var badSelected = this.selected;
+                    for (let option in badSelected) {
+                        if (badSelected[option] != '') {
+                            fixedSelected.push(badSelected[option]);
+                        } else {
+                            fixedSelected.push(0);
+                        }
+                    }
+                    return fixedSelected;
+                },
+                postData(url, data,fail) {
                     // Default options are marked with *
                     var fdata = {
                         body: JSON.stringify(data),
@@ -211,7 +265,11 @@
                     if (this.token) {
                         fdata.headers['Authorization'] = 'Token ' + this.token;
                     }
-
+                    if(fail == 1) {
+                        return Promise.reject("There can't be repeated answers");
+                    } else if (fail == 2) {
+                        return Promise.reject("You must select the top 3");
+                    }
                     return fetch(url, fdata)
                         .then(response => {
                             if (response.status === 200) {
@@ -257,12 +315,37 @@
                     this.successVote = false;
                 },
                 decideEncrypt() {
-                    var bigmsg = BigInt.fromJSONObject(this.selected.toString());
+                    res = this.selected.toString()
+                    var bigmsg = BigInt.fromJSONObject(res);
                     var cipher = ElGamal.encrypt(this.bigpk, bigmsg);
                     return cipher;
                 },
+                correctVoting() {
+                    if(this.ranked) {
+                        res = this.selected;
+                        const list = []; 
+                        for (let v in res) {
+                            if(res[v] == 1) {
+                                list.push(res[v]);
+                            }else if(res[v] == 2) {
+                                list.push(res[v]);
+                            }else if(res[v] == 3) {
+                                list.push(res[v]);
+                            }
+                        }
+                        const set = new Set(list);
+                        if (list.length != set.size) {
+                            return 1;
+                        } else if (set.size != 3) {
+                            return 2;
+                        }
+                    }
+                    return 0;
+                },
                 decideSend(evt) {
                     evt.preventDefault();
+                    badVote = this.correctVoting();
+                    this.selected = this.parseSelected();
                     var v = this.decideEncrypt();
                     var data = {
                         vote: {a: v.alpha.toString(), b: v.beta.toString()},
@@ -270,7 +353,7 @@
                         voter: this.user.id,
                         token: this.token
                     }
-                    this.postData("{% url "gateway" "store" "/" %}", data)
+                    this.postData("{% url "gateway" "store" "/" %}", data, badVote)
                         .then(data => {
                             this.successVote = true;
                             this.alertShow = false;
