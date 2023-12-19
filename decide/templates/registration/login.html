@@ -9,25 +9,22 @@
       <button type="submit" class="btn btn-primary">Log in</button>
     </form>
     <div class="social-login">
-      <p>Or log in with:</p>
+      <p>Or sign in with:</p>
       <ul>
         <li class="google">
           <a href="{% url "social:begin" "google-oauth2" %}">
-            <img src="{% static 'images/google.png' %}" alt="Google" style="width:24px;height:24px;">
+            Sign in with Google
           </a>
-        </li>
-        <li class="twitter">
-          <a href="{% url "social:begin" "twitter" %}">
-            <img src="{% static 'images/twitter.png' %}" alt="Twitter" style="width:24px;height:24px;">
-          </a>
-        </li>
-        <li class="github">
-          <a href="{% url 'social:begin' 'github' %}">
-            <img src="{% static 'images/github.png' %}" alt="GitHub" style="width:24px;height:24px;">
-          </a>
-        </li>
+      </li>
+      </li>
+      <li class="twitter">
+        <a href="{% url "social:begin" "twitter" %}">
+          Sign in with Twitter
+      </a> </li>
+        <a href="{% url 'social:begin' 'github' %}" class="btn btn-link btn-lg active btn-block">Sign in with GitHub</a>
       </ul>
     </div>
   </div>
 {% endblock %}
+
 
