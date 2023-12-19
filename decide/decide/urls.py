@@ -17,6 +17,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_swagger.views import get_swagger_view
+from django.urls import path, include
 from authentication import  views
 
 

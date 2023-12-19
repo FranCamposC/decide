@@ -1,0 +1,32 @@
+{% load static %}
+{% block content %}
+  <div class="login-container">
+    <h2>Welcome back!</h2>
+    <p>Please, enter your credentials to log in:</p>
+    <form method="post" class="login-form">
+      {{ form.as_p }}
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Log in</button>
+    </form>
+    <div class="social-login">
+      <p>Or log in with:</p>
+      <ul>
+        <li class="google">
+          <a href="{% url "social:begin" "google-oauth2" %}">
+            <img src="{% static 'images/google.png' %}" alt="Google" style="width:24px;height:24px;">
+          </a>
+        </li>
+        <li class="twitter">
+          <a href="{% url "social:begin" "twitter" %}">
+            <img src="{% static 'images/twitter.png' %}" alt="Twitter" style="width:24px;height:24px;">
+          </a>
+        </li>
+        <li class="github">
+          <a href="{% url 'social:begin' 'github' %}">
+            <img src="{% static 'images/github.png' %}" alt="GitHub" style="width:24px;height:24px;">
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
