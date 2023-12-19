@@ -11,10 +11,11 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+# settings.py
 import sentry_sdk
 
 sentry_sdk.init(
-    dsn="https://45092046a4ea616f8e782deb10629dae@o4506401801175040.ingest.sentry.io/4506401808318464",
+    dsn="https://c64b40dd10a9d09648705c50991229d1@o4506401801175040.ingest.sentry.io/4506423636590592",
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
     traces_sample_rate=1.0,
@@ -53,12 +54,12 @@ INSTALLED_APPS = [
 
     'corsheaders',
     'django_filters',
+    'social_django',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'gateway',
 
-    'social_django',
     'django_extensions'
 ]
 
@@ -173,7 +174,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 
@@ -189,8 +190,11 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
-
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 # number of bits for the key, all auths should use the same number of bits
 KEYBITS = 256
 
