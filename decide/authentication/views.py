@@ -17,6 +17,11 @@ from census.models import Census
 from voting.models import Voting
 
 
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login
+from .forms import LoginForm
+
 from .serializers import UserSerializer
 
 
@@ -60,6 +65,23 @@ class RegisterView(APIView):
             return Response({}, status=HTTP_400_BAD_REQUEST)
         return Response({'user_pk': user.pk, 'token': token.key}, HTTP_201_CREATED)
 
+class LoginForm(APIView):
+    def post(self, request):
+        username = request.data.get('username', '')
+        password = request.data.get('password', '')
+        if not username or not password:
+            return Response({}, status=HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return Response({'message': 'Authenticated successfully'}, status=HTTP_201_CREATED)
+            else:
+                return Response({'message': 'Disabled account'}, status=HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'message': 'Invalid login'}, status=HTTP_401_UNAUTHORIZED)
+          
 def WelcomeView(request):
     return render(request,'welcome.html')
 
@@ -68,6 +90,9 @@ def UserView(request):
     id_votaciones=[censo.voting_id for censo in censos]
     votaciones_usuario=Voting.objects.filter(id__in=id_votaciones)
     return render(request,'userView.html',{'votaciones':votaciones_usuario,'usuario':request.user})
+
+def AdminView(request):
+    return render(request,'adminView.html')
 
 def Register(request):
     if request.method == 'GET':
@@ -80,8 +105,7 @@ def Register(request):
                 usuario=User.objects.create_user(username=request.POST['username'],     
                                     password=request.POST['password1'])
                 usuario.save()
-                login(request,usuario)
-                return redirect('user')
+                return redirect('/authentication/logueo')
             except:
                 return render(request,'register.html',{
                 'form': UserCreationForm,
@@ -102,7 +126,8 @@ def cerrarSesion(request):
 def Login(request):
     if request.method=='GET':
         return render(request,'login.html',{
-            'form':AuthenticationForm
+            'form':AuthenticationForm,
+            'admin':False
         })
     else:
         usuario=authenticate(
@@ -111,10 +136,29 @@ def Login(request):
         if usuario is None:
             return render(request,'login.html',{
                 'form':AuthenticationForm,
-                'error':'Usuario o contraseña incorrectos'
+                'error':'Usuario o contraseña incorrectos',
+                'admin':False
             })
         else:
             login(request,usuario)
             return redirect('user')
-
-         
+          
+def LoginAdmin(request):
+    if request.method=='GET':
+        return render(request,'login.html',{
+            'form':AuthenticationForm,
+            'admin':True
+        })
+    if request.method=='POST':
+        usuario=authenticate(
+            request,username=request.POST['username'], password=request.POST
+            ['password'])
+        if usuario is None or not usuario.is_staff:
+            return render(request,'login.html',{
+                'form':AuthenticationForm,
+                'error':'Usuario o contraseña incorrectos',
+                'admin':True
+            })
+        else:
+            login(request,usuario)
+            return redirect('/user/admin') 

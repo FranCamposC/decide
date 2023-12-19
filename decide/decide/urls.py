@@ -17,6 +17,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_swagger.views import get_swagger_view
+from django.urls import path, include
 from authentication import  views
 
 
@@ -27,7 +28,8 @@ urlpatterns = [
     path('doc/', schema_view),
     path('gateway/', include('gateway.urls')),
     path('',views.WelcomeView,name='home'),
-    path('user/',views.UserView,name='user')
+    path('user/',views.UserView,name='user'),
+    path('user/admin/',views.AdminView, name='admin')
 ]
 
 for module in settings.MODULES:

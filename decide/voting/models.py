@@ -1,7 +1,8 @@
 from django.db import models
 from django.db.models import JSONField
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
+from django.forms import ValidationError
 
 from base import mods
 from base.models import Auth, Key
@@ -9,9 +10,35 @@ from base.models import Auth, Key
 
 class Question(models.Model):
     desc = models.TextField()
+    TYPES = [
+        ('BINARY', 'Si_No'),
+        ('RANKING', 'Ranking'),
+        ('NORMAL', 'Normal'),
+        ('MULTIPLE', 'Multiple_choice')
+    ]
+    type = models.CharField(
+        max_length=10,
+        choices=TYPES,
+        default='NORMAL'
+    )
 
     def __str__(self):
         return self.desc
+
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+
+        if self.type == "BINARY":
+            if not is_new:
+                self.options.all().delete()
+            if not self.options.filter(option="Sí").exists():
+                QuestionOption.objects.create(question=self, option="Sí", number=1)
+            if not self.options.filter(option="No").exists():
+                QuestionOption.objects.create(question=self, option="No", number=2)
+
+
 
 
 class QuestionOption(models.Model):
@@ -19,13 +46,22 @@ class QuestionOption(models.Model):
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
 
-    def save(self):
+
+    def save(self, *args, **kwargs):
         if not self.number:
             self.number = self.question.options.count() + 2
+
+        # Verifica si la pregunta es de tipo binario y evita crear opciones adicionales
+        if self.question.type != "BINARY" or not self.question.options.exists():
+            super().save(*args, **kwargs)
+
+
+
         return super().save()
 
     def __str__(self):
         return '{} ({})'.format(self.option, self.number)
+    
 
 
 class Voting(models.Model):
@@ -33,7 +69,6 @@ class Voting(models.Model):
     desc = models.TextField(blank=True, null=True)
     question = models.ForeignKey(Question, related_name='voting', on_delete=models.CASCADE)
 
-    ranked = models.BooleanField(default=False)
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
@@ -43,6 +78,18 @@ class Voting(models.Model):
 
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
+
+    def estado(self):
+        res = 'Sin empezar'
+        if self.start_date:
+            if self.end_date:
+                if self.tally:
+                    res = 'Recontada'
+                else:
+                    res = 'Finalizada'
+            else:
+                res = 'Empezada'
+        return res
 
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():
@@ -109,8 +156,10 @@ class Voting(models.Model):
 
         self.do_postproc()
 
+        
+
     def do_postproc(self):
-        ranked = self.ranked
+        ranked = self.question.type =='RANKING'
         tally = self.tally
         options = self.question.options.all()
 
