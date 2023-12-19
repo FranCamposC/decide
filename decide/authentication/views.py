@@ -88,8 +88,7 @@ def Register(request):
                 usuario=User.objects.create_user(username=request.POST['username'],     
                                     password=request.POST['password1'])
                 usuario.save()
-                login(request,usuario)
-                return redirect('user')
+                return redirect('/authentication/logueo')
             except:
                 return render(request,'register.html',{
                 'form': UserCreationForm,
