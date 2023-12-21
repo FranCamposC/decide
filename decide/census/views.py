@@ -151,6 +151,7 @@ class CensusExport(generics.RetrieveAPIView):
 
             for census in Census.objects.filter(voting_id=voting_id).values_list('voting_id', 'voter_id'):
                 writer.writerow(census)
+            #Cambio
         except Exception as e:
             return Response('Error processing request', status=ST_500)
         return response
