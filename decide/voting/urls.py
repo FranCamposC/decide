@@ -14,5 +14,6 @@ urlpatterns = [
     path('edit/<int:voting_id>',views.VotingEditView , name="votingEdit"),
     path('create',views.VotingCreateView , name="votingCreate"),
     path('question/edit/<int:question_id>',views.editQuestion, name="editQuestion"),
+    path('process/<int:voting_id>', views.votingProcess, name="votingProcess")
 
 ]
